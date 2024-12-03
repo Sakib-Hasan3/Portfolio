@@ -1,0 +1,101 @@
+/* General Styles */
+body {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    background-color: #121212;
+    color: #fff;
+    text-align: center;
+}
+
+h2 {
+    margin-bottom: 20px;
+    font-size: 2rem;
+    color: #fff;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+/* Header */
+header {
+    background: linear-gradient(45deg, #1d1d1d, #333);
+    padding: 50px 0;
+    color: #fff;
+}
+
+header h1 span {
+    color: #00c8ff;
+}
+
+/* Services Section */
+.service-cards {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.service-card {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    flex: 1 1 calc(30% - 20px);
+    max-width: calc(30% - 20px);
+    transition: transform 0.3s;
+    text-align: left;
+}
+
+.service-card:hover {
+    transform: scale(1.05);
+}
+
+.service-card .service-icon {
+    font-size: 2.5rem;
+    color: #ffcc00;
+    margin-bottom: 10px;
+}
+
+/* Portfolio Section */
+.project-cards {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.project-card {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    flex: 1 1 calc(30% - 20px);
+    max-width: calc(30% - 20px);
+    transition: transform 0.3s;
+    text-align: left;
+}
+
+.project-card:hover {
+    transform: scale(1.05);
+}
+
+.project-card img {
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.project-card a {
+    color: #00c8ff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.project-card a:hover {
+    color: #ffcc00;
+}
