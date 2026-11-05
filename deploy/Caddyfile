@@ -1,0 +1,14 @@
+# The public site. The Next.js app proxies /api/v1 and /uploads to FastAPI internally.
+{$SITE_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy web:3000
+}
+
+# Direct API access (Swagger docs, scripts, or a Vercel-hosted frontend).
+{$API_DOMAIN} {
+	encode zstd gzip
+	request_body {
+		max_size 20MB
+	}
+	reverse_proxy api:8000
+}

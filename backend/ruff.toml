@@ -1,0 +1,9 @@
+line-length = 130
+target-version = "py312"
+extend-exclude = ["migrations/versions"]
+
+[lint]
+select = ["E", "F", "I", "B", "UP"]
+# Generic[T] keeps pydantic generics explicit; PEP 695 syntax is not required
+extend-ignore = ["UP046", "UP047"]
+ignore = ["B008", "E501"]

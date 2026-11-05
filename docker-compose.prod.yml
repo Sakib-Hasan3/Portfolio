@@ -1,0 +1,36 @@
+# Production overrides for a single VPS running the whole stack behind Caddy (automatic HTTPS).
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Set SITE_DOMAIN (e.g. sakibhasan.dev) and API_DOMAIN (e.g. api.sakibhasan.dev) in .env.
+
+services:
+  db:
+    ports: []
+
+  api:
+    environment:
+      ENVIRONMENT: production
+      COOKIE_SECURE: "true"
+      SEED_ON_START: ${SEED_ON_START:-false}
+    ports: !reset []
+
+  web:
+    ports: !reset []
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [web, api]
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?set SITE_DOMAIN}
+      API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
