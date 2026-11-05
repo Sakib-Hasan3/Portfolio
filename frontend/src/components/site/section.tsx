@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Reveal } from "./reveal";
 
 /**
  * Editorial two-column section: the heading sits in a left rail on wide screens
@@ -31,7 +32,7 @@ export function Section({
             {aside}
           </div>
         </div>
-        <div className="min-w-0 lg:col-span-8">{children}</div>
+        <Reveal className="min-w-0 lg:col-span-8">{children}</Reveal>
       </div>
     </section>
   );

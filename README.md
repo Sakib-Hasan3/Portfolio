@@ -52,6 +52,13 @@ cp .env.example .env.local               # API_INTERNAL_URL=http://localhost:800
 npm run dev
 ```
 
+## AI assistant ("Ask Sakib's AI")
+
+A floating chat on the public site answers questions about the portfolio using retrieval-augmented generation over
+your **published** content. Edit anything in `/admin` and the assistant's knowledge follows automatically (background
+re-indexing, no redeploy). Set `GROQ_API_KEY` in `.env`, then manage it at `/admin/assistant`.
+See [docs/ASSISTANT.md](docs/ASSISTANT.md) for architecture, safety rules and the API.
+
 ## 3-D and motion
 
 - **Hero:** a WebGL scene (three.js, loaded only on the home page) built from your skills in the CMS. Points fly in and

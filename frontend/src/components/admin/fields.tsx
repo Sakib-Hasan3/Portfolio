@@ -1,12 +1,13 @@
 "use client";
 
-import { ArrowDown, ArrowUp, FileText, ImagePlus, Plus, Trash, Upload, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Eye, FileText, FileUp, Pencil, ImagePlus, Plus, Trash, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { CategoryIcon } from "@/components/site/icons";
 import { api, ApiError, upload } from "@/lib/admin/client";
 import { ICON_OPTIONS } from "@/lib/admin/resources";
 import type { PageResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { Markdown } from "@/components/site/markdown";
 import { Spinner, useToast } from "./ui";
 
 export function FieldShell({ label, htmlFor, help, error, required, children, className }: {
@@ -260,6 +261,94 @@ export function IconPicker({ value, onChange }: { value: string | null; onChange
           <CategoryIcon name={name} className="size-4" />
         </button>
       ))}
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ markdown
+const MAX_MD_FILE_BYTES = 1024 * 1024;
+
+/** Textarea for Markdown with an "Upload .md file" button and a live preview, so content can be pasted, typed or imported. */
+export function MarkdownField({ id, value, onChange, rows, maxLength, invalid }: {
+  id: string; value: string; onChange: (v: string) => void; rows: number; maxLength: number; invalid?: boolean;
+}) {
+  const toast = useToast();
+  const input = useRef<HTMLInputElement>(null);
+  const [mode, setMode] = useState<"write" | "preview">("write");
+
+  const importFile = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      if (!/\.(md|markdown|txt)$/i.test(file.name) && !file.type.startsWith("text/")) {
+        toast("error", "Choose a .md (Markdown) or .txt file");
+        return;
+      }
+      if (file.size > MAX_MD_FILE_BYTES) {
+        toast("error", "That file is larger than 1 MB");
+        return;
+      }
+      const text = (await file.text()).replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
+      if (text.length > maxLength) {
+        toast("error", `The file has ${text.length.toLocaleString()} characters; the limit is ${maxLength.toLocaleString()}. Shorten it and try again.`);
+        return;
+      }
+      if (value.trim() && !window.confirm(`Replace the current text with “${file.name}”?`)) return;
+      onChange(text);
+      setMode("write");
+      toast("success", `Imported ${file.name}`);
+    } catch {
+      toast("error", "Could not read that file");
+    } finally {
+      if (input.current) input.current.value = "";
+    }
+  };
+
+  return (
+    <div>
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <div className="inline-flex rounded-lg border border-line p-0.5" role="tablist" aria-label="Editor mode">
+          {([["write", "Write", Pencil], ["preview", "Preview", Eye]] as const).map(([key, label, Icon]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={mode === key}
+              onClick={() => setMode(key)}
+              className={cn("inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm", mode === key ? "bg-surface-2 text-text" : "text-muted hover:text-text")}
+            >
+              <Icon className="size-3.5" /> {label}
+            </button>
+          ))}
+        </div>
+        <button type="button" className="btn btn-ghost !px-3 !py-1.5 text-sm" onClick={() => input.current?.click()}>
+          <FileUp className="size-4" /> Upload .md file
+        </button>
+        <input ref={input} type="file" accept=".md,.markdown,.txt,text/markdown,text/plain" className="sr-only" tabIndex={-1} onChange={(e) => importFile(e.target.files?.[0])} />
+        <span className="ml-auto text-xs text-faint">{value.length.toLocaleString()} / {maxLength.toLocaleString()}</span>
+      </div>
+      {mode === "write" ? (
+        <textarea
+          id={id}
+          rows={rows}
+          spellCheck
+          className="field resize-y font-mono text-[13.5px] leading-relaxed"
+          aria-invalid={invalid}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            const f = e.dataTransfer.files?.[0];
+            if (f) {
+              e.preventDefault();
+              importFile(f);
+            }
+          }}
+        />
+      ) : (
+        <div className="min-h-[12rem] rounded-lg border border-line bg-surface p-4 text-muted">
+          {value.trim() ? <Markdown text={value} /> : <p className="text-faint">Nothing to preview yet.</p>}
+        </div>
+      )}
     </div>
   );
 }

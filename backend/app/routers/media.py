@@ -15,9 +15,9 @@ from app.services.activity import log_activity
 
 router = APIRouter(prefix="/media", tags=["admin:media"])
 
-Purpose = Literal["avatar", "project-thumbnail", "project-screenshot", "publication-pdf", "resume", "og-image", "misc"]
+Purpose = Literal["avatar", "project-thumbnail", "project-screenshot", "publication-pdf", "resume", "og-image", "note-cover", "misc"]
 _EXPECTED = {"publication-pdf": "pdf", "resume": "pdf", "avatar": "image", "project-thumbnail": "image",
-             "project-screenshot": "image", "og-image": "image"}
+             "project-screenshot": "image", "og-image": "image", "note-cover": "image"}
 
 
 @router.post("/upload", response_model=MediaAssetRead, status_code=status.HTTP_201_CREATED)

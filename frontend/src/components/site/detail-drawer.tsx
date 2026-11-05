@@ -1,5 +1,6 @@
 "use client";
 
+import { Markdown } from "./markdown";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -187,7 +188,7 @@ export function ProjectDrawer({
             {project.description && (
               <section>
                 <h3 className="text-lg font-semibold">Overview</h3>
-                <p className="mt-3 max-w-prose text-muted">{project.description}</p>
+                <Markdown text={project.description} className="mt-3 max-w-prose text-muted" />
               </section>
             )}
 

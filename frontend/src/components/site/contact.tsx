@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import type { Profile, SocialLink } from "@/lib/types";
 import { SocialIcon } from "./icons";
+import { useT } from "@/components/i18n-provider";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Enter your name").max(120),
@@ -18,6 +19,7 @@ const schema = z.object({
 type Values = z.infer<typeof schema>;
 
 export function ContactSection({ profile, links, enabled }: { profile: Profile; links: SocialLink[]; enabled: boolean }) {
+  const t = useT();
   const startedAt = useRef<number>(Date.now());
   const [state, setState] = useState<"idle" | "sent" | "error">("idle");
   const [serverError, setServerError] = useState<string | null>(null);
@@ -47,9 +49,9 @@ export function ContactSection({ profile, links, enabled }: { profile: Profile; 
     <section id="contact" aria-labelledby="contact-title" className="container-x border-t border-line py-16 md:py-24">
       <div className="grid gap-12 lg:grid-cols-12">
         <div className="lg:col-span-5">
-          <h2 id="contact-title" className="text-3xl md:text-4xl">Get in touch</h2>
+          <h2 id="contact-title" className="text-3xl md:text-4xl">{t("contact.title")}</h2>
           <p className="mt-4 max-w-md text-muted">
-            {profile.availability_note || "Have a role, a research idea or a project in mind? Send a message and I'll reply by email."}
+            {profile.availability_note || t("contact.default")}
           </p>
           <ul className="mt-8 space-y-4">
             {profile.email && (
@@ -87,8 +89,8 @@ export function ContactSection({ profile, links, enabled }: { profile: Profile; 
           ) : state === "sent" ? (
             <div className="rounded-xl border border-line bg-surface p-8" role="status">
               <CircleCheck className="size-7 text-ok" aria-hidden />
-              <h3 className="mt-4 text-2xl">Message sent</h3>
-              <p className="mt-2 text-muted">Thanks for writing. I&apos;ll reply to the email address you gave.</p>
+              <h3 className="mt-4 text-2xl">{t("contact.sent")}</h3>
+              <p className="mt-2 text-muted">{t("contact.sent.body")}</p>
               <button type="button" className="btn btn-ghost mt-6" onClick={() => { setState("idle"); startedAt.current = Date.now(); }}>
                 Send another message
               </button>
@@ -96,16 +98,16 @@ export function ContactSection({ profile, links, enabled }: { profile: Profile; 
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} noValidate className="rounded-xl border border-line bg-surface p-6 md:p-8">
               <div className="grid gap-5 sm:grid-cols-2">
-                <Field label="Name" error={errors.name?.message}>
+                <Field label={t("contact.name")} error={errors.name?.message}>
                   <input {...register("name")} autoComplete="name" className="field" aria-invalid={!!errors.name} />
                 </Field>
-                <Field label="Email" error={errors.email?.message}>
+                <Field label={t("contact.email")} error={errors.email?.message}>
                   <input {...register("email")} type="email" autoComplete="email" className="field" aria-invalid={!!errors.email} />
                 </Field>
-                <Field label="Subject" error={errors.subject?.message} className="sm:col-span-2">
+                <Field label={t("contact.subject")} error={errors.subject?.message} className="sm:col-span-2">
                   <input {...register("subject")} className="field" aria-invalid={!!errors.subject} />
                 </Field>
-                <Field label="Message" error={errors.message?.message} className="sm:col-span-2">
+                <Field label={t("contact.message")} error={errors.message?.message} className="sm:col-span-2">
                   <textarea {...register("message")} rows={6} className="field resize-y" aria-invalid={!!errors.message} />
                 </Field>
                 {/* Honeypot: hidden from people, irresistible to bots */}
@@ -118,10 +120,10 @@ export function ContactSection({ profile, links, enabled }: { profile: Profile; 
               </div>
               {serverError && <p className="mt-4 text-sm text-danger" role="alert">{serverError}</p>}
               <div className="mt-6 flex items-center justify-between gap-4">
-                <p className="text-xs text-faint">Your details are only used to reply to you.</p>
+                <p className="text-xs text-faint">{t("contact.privacy")}</p>
                 <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
                   {isSubmitting ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : <Send className="size-4" aria-hidden />}
-                  {isSubmitting ? "Sending" : "Send message"}
+                  {isSubmitting ? t("contact.sending") : t("contact.send")}
                 </button>
               </div>
             </form>

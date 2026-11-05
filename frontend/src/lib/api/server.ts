@@ -1,6 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import type { Portfolio, Project, Publication } from "@/lib/types";
+import type { Note, NoteCard, Portfolio, Project, Publication } from "@/lib/types";
 
 /** Base URL the Next.js server uses to reach FastAPI (internal network address in Docker). */
 export const API_INTERNAL_URL = (process.env.API_INTERNAL_URL || "http://localhost:8000").replace(/\/$/, "");
@@ -45,9 +45,20 @@ export const getPublications = unstable_cache(() => getJSON<Publication[]>("/pub
   revalidate: FALLBACK_REVALIDATE,
 });
 
+export const getNotes = unstable_cache(() => getJSON<NoteCard[]>("/public/notes"), ["notes"], {
+  tags: ["portfolio", "notes"],
+  revalidate: FALLBACK_REVALIDATE,
+});
+
+export const getNote = (slug: string) =>
+  unstable_cache(() => getJSON<Note>(`/public/notes/${encodeURIComponent(slug)}`), ["note", slug], {
+    tags: ["portfolio", "notes"],
+    revalidate: FALLBACK_REVALIDATE,
+  })();
+
 export const getSitemapData = unstable_cache(
   () =>
-    getJSON<{ projects: { slug: string; updated_at: string }[]; publications?: { slug: string; updated_at: string }[] }>(
+    getJSON<{ projects: { slug: string; updated_at: string }[]; publications?: { slug: string; updated_at: string }[]; notes?: { slug: string; updated_at: string }[] }>(
       "/public/sitemap",
     ),
   ["sitemap"],

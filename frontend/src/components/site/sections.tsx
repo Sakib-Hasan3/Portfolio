@@ -1,28 +1,13 @@
 import { Check, ExternalLink, GraduationCap } from "lucide-react";
+import { useT } from "@/components/i18n-provider";
+import { Markdown } from "./markdown";
 import type { Achievement, Education, Experience, Portfolio, SkillCategory } from "@/lib/types";
-import { textBlocks, yearSpan } from "@/lib/utils";
+import { yearSpan } from "@/lib/utils";
 import { CategoryIcon } from "./icons";
 import { Section } from "./section";
 
 export function RichText({ text, className = "" }: { text: string | null | undefined; className?: string }) {
-  const blocks = textBlocks(text);
-  return (
-    <div className={`space-y-4 ${className}`}>
-      {blocks.map((b, i) =>
-        b.type === "p" ? (
-          <p key={i} className="whitespace-pre-line">
-            {b.text}
-          </p>
-        ) : (
-          <ul key={i} className="list-disc space-y-1.5 pl-5 marker:text-faint">
-            {b.items.map((it, j) => (
-              <li key={j}>{it}</li>
-            ))}
-          </ul>
-        ),
-      )}
-    </div>
-  );
+  return <Markdown text={text} className={className} />;
 }
 
 export function About({ data }: { data: Portfolio }) {
@@ -66,9 +51,10 @@ export function About({ data }: { data: Portfolio }) {
 }
 
 export function Skills({ categories }: { categories: SkillCategory[] }) {
+  const t = useT();
   if (!categories.length) return null;
   return (
-    <Section id="skills" title="Skills" lede="The tools and methods I work with, grouped by area.">
+    <Section id="skills" title={t("sec.skills")} lede={t("sec.skills.lede")}>
       <div className="divide-y divide-line border-y border-line">
         {categories.map((c) => (
           <div key={c.id} className="grid gap-4 py-6 sm:grid-cols-[14rem_1fr] sm:gap-8">
@@ -91,9 +77,10 @@ export function Skills({ categories }: { categories: SkillCategory[] }) {
 }
 
 export function ExperienceTimeline({ items }: { items: Experience[] }) {
+  const t = useT();
   if (!items.length) return null;
   return (
-    <Section id="experience" title="Experience & leadership">
+    <Section id="experience" title={t("sec.experience")}>
       <ol className="relative border-l border-line pl-8">
         {items.map((e) => (
           <li key={e.id} className="relative pb-12 last:pb-0">
@@ -126,9 +113,10 @@ export function ExperienceTimeline({ items }: { items: Experience[] }) {
 }
 
 export function EducationList({ items }: { items: Education[] }) {
+  const t = useT();
   if (!items.length) return null;
   return (
-    <Section id="education" title="Education">
+    <Section id="education" title={t("sec.education")}>
       <div className="space-y-6">
         {items.map((e) => (
           <article key={e.id} className="flex gap-5 rounded-xl border border-line bg-surface p-6">
@@ -168,9 +156,10 @@ export function EducationList({ items }: { items: Education[] }) {
 }
 
 export function Achievements({ items }: { items: Achievement[] }) {
+  const t = useT();
   if (!items.length) return null;
   return (
-    <Section id="achievements" title="Achievements">
+    <Section id="achievements" title={t("sec.achievements")}>
       <ul className="divide-y divide-line border-y border-line">
         {items.map((a) => (
           <li key={a.id} className="grid gap-2 py-5 sm:grid-cols-[5rem_1fr]">

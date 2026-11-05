@@ -1,4 +1,5 @@
 import type { SocialLink } from "@/lib/types";
+import Link from "next/link";
 import { SocialIcon } from "./icons";
 
 export function SiteFooter({ name, text, links }: { name: string; text?: string | null; links: SocialLink[] }) {
@@ -9,6 +10,7 @@ export function SiteFooter({ name, text, links }: { name: string; text?: string 
           © {new Date().getFullYear()} {name}
           {text ? <span className="block text-faint sm:inline sm:before:content-['_—_']">{text}</span> : null}
         </p>
+        <Link href="/cv" className="hover:text-text sm:ml-auto sm:mr-4">CV</Link>
         <ul className="flex items-center gap-2">
           {links.map((l) => (
             <li key={l.id}>

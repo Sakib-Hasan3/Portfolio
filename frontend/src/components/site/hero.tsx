@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import type { Portfolio } from "@/lib/types";
 import { HeroVisual } from "./hero-visual";
 import { SocialIcon } from "./icons";
+import { useT } from "@/components/i18n-provider";
 
 const HeroScene = dynamic(() => import("./hero-scene"), { ssr: false, loading: () => null });
 
@@ -19,6 +20,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 export function Hero({ data }: { data: Portfolio }) {
+  const t = useT();
   const p = data.profile!;
   const heroLinks = data.social_links.filter((l) => l.show_in_hero);
 
@@ -50,7 +52,7 @@ export function Hero({ data }: { data: Portfolio }) {
                     <span className="absolute inline-flex size-full animate-ping rounded-full bg-ok opacity-40 motion-reduce:hidden" />
                     <span className="relative inline-flex size-2 rounded-full bg-ok" />
                   </span>
-                  Available for new work
+                  {t("hero.available")}
                 </p>
               ) : null}
             </div>
@@ -71,15 +73,15 @@ export function Hero({ data }: { data: Portfolio }) {
 
           <motion.div {...fadeUp(0.45)} className="mt-9 flex flex-wrap items-center gap-3">
             <Link href="/#projects" className="btn btn-primary">
-              View my projects
+              {t("hero.projects")}
             </Link>
             {data.resume ? (
               <a href={data.resume.file_url} className="btn btn-ghost" download>
-                <FileDown className="size-4" aria-hidden /> Download CV
+                <FileDown className="size-4" aria-hidden /> {t("hero.cv")}
               </a>
             ) : null}
             <Link href="/#contact" className="btn btn-quiet">
-              Contact me
+              {t("hero.contact")}
             </Link>
             {heroLinks.length > 0 && <span className="mx-1 hidden h-6 w-px bg-line sm:block" aria-hidden />}
             {heroLinks.map((l) => (

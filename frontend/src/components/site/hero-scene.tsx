@@ -33,6 +33,8 @@ interface ShapeConfig {
   scale: number;
   colorIdx: number;
   mesh?: THREE.Mesh | THREE.LineSegments;
+  baseColor?: THREE.Color;
+  baseOpacity?: number;
 }
 
 export default function HeroScene() {
@@ -64,6 +66,29 @@ export default function HeroScene() {
     const fill = new THREE.DirectionalLight(0x8899ff, 0.4);
     fill.position.set(-6, -3, 5);
     scene.add(fill);
+    const pointerLight = new THREE.PointLight(0x8ea2ff, 0, 22, 1.6);
+    pointerLight.position.set(0, 0, 4);
+    scene.add(pointerLight);
+
+    // depth starfield: tiny points on several layers, drifts with the pointer for parallax
+    const starCount = 260;
+    const starPos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      starPos[i * 3] = (Math.random() - 0.5) * 34;
+      starPos[i * 3 + 1] = (Math.random() - 0.5) * 20;
+      starPos[i * 3 + 2] = -2 - Math.random() * 16;
+    }
+    const starGeo = new THREE.BufferGeometry();
+    starGeo.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
+    const starMat = new THREE.PointsMaterial({ size: 0.07, color: 0xaab6ff, transparent: true, opacity: 0.55, sizeAttenuation: true, depthWrite: false });
+    const stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
+    const hot = new THREE.Color();
+    let hotH = 238;
+    const hueAt = (nx: number, ny: number) => {
+      const x = Math.min(1, Math.max(0, nx));
+      return (x < 0.5 ? 238 - 68 * (x / 0.5) : 170 - 128 * ((x - 0.5) / 0.5)) - ny * 18;
+    };
 
     let colors = readThemeColors();
 
@@ -115,19 +140,41 @@ export default function HeroScene() {
       obj.rotation.set(cfg.rotX, cfg.rotY, cfg.rotZ);
       obj.scale.setScalar(cfg.scale);
       cfg.mesh = obj;
+      const m0 = obj.material as THREE.LineBasicMaterial | THREE.MeshStandardMaterial;
+      cfg.baseColor = m0.color.clone();
+      cfg.baseOpacity = m0.opacity;
       meshGroup.add(obj);
     }
 
     // Mouse parallax
     let mouseX = 0;
+    let ndcX = 0;
+    let ndcY = 0;
+    let pointerSeen = false;
+    const ray = new THREE.Vector3();
+    const pointerWorld = new THREE.Vector3(0, 0, -3);
     let mouseY = 0;
     let targetX = 0;
     let targetY = 0;
     const onMouseMove = (e: MouseEvent) => {
       mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
       mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+      const r = wrap.getBoundingClientRect();
+      ndcX = ((e.clientX - r.left) / Math.max(1, r.width)) * 2 - 1;
+      ndcY = -(((e.clientY - r.top) / Math.max(1, r.height)) * 2 - 1);
+      pointerSeen = true;
+      hotH = hueAt(e.clientX / window.innerWidth, e.clientY / window.innerHeight);
     };
     window.addEventListener("mousemove", onMouseMove);
+
+    // Scroll depth: the whole field drifts and turns as the page scrolls, so the hero feels like a space you move through.
+    let scrollP = 0;
+    let scrollTarget = 0;
+    const onScroll = () => {
+      scrollTarget = Math.min(1.5, window.scrollY / Math.max(1, window.innerHeight));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     // Resize
     const resize = () => {
@@ -146,6 +193,7 @@ export default function HeroScene() {
       for (const cfg of shapeConfigs) {
         if (!cfg.mesh) continue;
         const color = new THREE.Color(cfg.colorIdx === 0 ? colors.accent : colors.data);
+        cfg.baseColor = color.clone();
         const mats = Array.isArray((cfg.mesh as THREE.Mesh).material)
           ? ((cfg.mesh as THREE.Mesh).material as THREE.Material[])
           : [(cfg.mesh as THREE.Mesh).material as THREE.Material];
@@ -169,8 +217,11 @@ export default function HeroScene() {
       if (!reduce) {
         targetX += (mouseX - targetX) * 0.03;
         targetY += (mouseY - targetY) * 0.03;
-        meshGroup.rotation.y = targetX * 0.08;
-        meshGroup.rotation.x = -targetY * 0.05;
+        scrollP += (scrollTarget - scrollP) * 0.06;
+        meshGroup.rotation.y = targetX * 0.08 + scrollP * 0.35;
+        meshGroup.rotation.x = -targetY * 0.05 + scrollP * 0.12;
+        meshGroup.position.y = scrollP * 3.2;
+        camera.position.z = 18 - scrollP * 4;
       }
       shapeConfigs.forEach((cfg, i) => {
         if (!cfg.mesh) return;
@@ -180,6 +231,31 @@ export default function HeroScene() {
         cfg.mesh.position.y = cfg.y + Math.sin(t * floatFreqs[i] + floatOffsets[i]) * floatAmps[i];
         cfg.mesh.position.x = cfg.x + Math.cos(t * floatFreqs[i] * 0.6 + floatOffsets[i]) * floatAmps[i] * 0.4;
       });
+      // pointer -> world point on the z=-3 plane; shapes near it glow and take the pointer's colour
+      if (pointerSeen && !reduce) {
+        ray.set(ndcX, ndcY, 0.5).unproject(camera).sub(camera.position).normalize();
+        const dist = (-3 - camera.position.z) / ray.z;
+        pointerWorld.copy(camera.position).addScaledVector(ray, dist);
+        pointerLight.position.set(pointerWorld.x, pointerWorld.y, 3);
+        hot.setHSL(hotH / 360, 0.85, 0.62);
+        pointerLight.color.copy(hot);
+        pointerLight.intensity += (26 - pointerLight.intensity) * 0.08;
+        for (const cfg of shapeConfigs) {
+          if (!cfg.mesh || !cfg.baseColor) continue;
+          const dx = cfg.mesh.position.x - pointerWorld.x;
+          const dy = cfg.mesh.position.y - pointerWorld.y;
+          const p = Math.max(0, 1 - Math.hypot(dx, dy) / 5.5);
+          const k = p * p;
+          const mat = cfg.mesh.material as THREE.LineBasicMaterial | THREE.MeshStandardMaterial;
+          mat.color.copy(cfg.baseColor).lerp(hot, k * 0.9);
+          mat.opacity = Math.min(0.95, (cfg.baseOpacity ?? 0.3) + k * 0.55);
+          cfg.mesh.scale.setScalar(1 + k * 0.16);
+        }
+        starMat.color.copy(hot).lerp(new THREE.Color(0xffffff), 0.35);
+      }
+      stars.position.x += ((-mouseX * 0.8) - stars.position.x) * 0.04;
+      stars.position.y += ((mouseY * 0.5) - stars.position.y) * 0.04;
+      stars.rotation.y = t * 0.012;
       renderer.render(scene, camera);
       raf = requestAnimationFrame(frame);
     };
@@ -190,6 +266,7 @@ export default function HeroScene() {
       ro.disconnect();
       mo.disconnect();
       window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("scroll", onScroll);
       scene.traverse((o) => {
         const any = o as THREE.Mesh;
         any.geometry?.dispose?.();

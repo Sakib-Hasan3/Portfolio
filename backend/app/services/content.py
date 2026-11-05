@@ -64,3 +64,15 @@ class ResumeService(CRUDService):
         if obj.is_active:
             self.db.execute(update(Resume).where(Resume.id != obj.id).values(is_active=False))
             self.db.flush()
+
+
+class NoteService(CRUDService):
+    def prepare(self, data: dict[str, Any], obj: Base | None) -> dict[str, Any]:
+        if data.get("published_at") is None:
+            data.pop("published_at", None)  # keep the existing date / let the column default (now) apply
+        return data
+
+    def serialize(self, obj: Base):
+        from app.schemas.content import NoteRead
+
+        return NoteRead.model_validate(obj, from_attributes=True)

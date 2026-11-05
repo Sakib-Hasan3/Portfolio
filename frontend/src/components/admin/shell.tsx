@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  BookOpen, Briefcase, ExternalLink, FileText, FolderKanban, GraduationCap, Image as ImageIcon, Inbox, KeyRound,
-  LayoutDashboard, Layers, Link2, LogOut, Menu, Settings, Sparkles, Trophy, UserRound, X,
+  BookOpen, Bot, Briefcase, ExternalLink, FileText, FolderKanban, GraduationCap, Image as ImageIcon, Inbox, KeyRound,
+  LayoutDashboard, Layers, Link2, LogOut, Menu, MessageSquareQuote, NotebookPen, Settings, Sparkles, Trophy, UserRound, X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -37,11 +37,14 @@ const NAV: { group: string; items: { href: string; label: string; icon: React.Co
       { href: "/admin/experience", label: "Experience", icon: Briefcase },
       { href: "/admin/education", label: "Education", icon: GraduationCap },
       { href: "/admin/achievements", label: "Achievements", icon: Trophy },
+      { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquareQuote },
+      { href: "/admin/notes", label: "Notes", icon: NotebookPen },
     ],
   },
   {
     group: "Site",
     items: [
+      { href: "/admin/assistant", label: "AI assistant", icon: Bot },
       { href: "/admin/messages", label: "Messages", icon: Inbox },
       { href: "/admin/media", label: "Media library", icon: ImageIcon },
       { href: "/admin/settings", label: "Website settings", icon: Settings },

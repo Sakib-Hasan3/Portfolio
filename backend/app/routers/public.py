@@ -1,5 +1,7 @@
 """Read-only endpoints for the public site. Only published, non-deleted content is ever returned."""
 
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
@@ -9,12 +11,14 @@ from app.models import (
     Achievement,
     Education,
     Experience,
+    Note,
     Profile,
     Project,
     Publication,
     Resume,
     SkillCategory,
     SocialLink,
+    Testimonial,
     WebsiteSettings,
 )
 from app.schemas.content import (
@@ -22,6 +26,8 @@ from app.schemas.content import (
     EducationRead,
     ExperienceRead,
     PortfolioBundle,
+    PublicNote,
+    PublicNoteCard,
     PublicProfile,
     PublicProject,
     PublicPublication,
@@ -31,6 +37,7 @@ from app.schemas.content import (
     PublicSkill,
     PublicSkillCategory,
     SocialLinkRead,
+    TestimonialRead,
 )
 
 router = APIRouter(prefix="/public", tags=["public"])
@@ -124,6 +131,21 @@ def _simple(db: Session, model, read_schema, order):
     return [read_schema.model_validate(r) for r in rows]
 
 
+def _published_notes_query():
+    return (
+        select(Note)
+        .where(Note.is_published.is_(True), Note.deleted_at.is_(None), Note.published_at <= datetime.now(UTC))
+        .order_by(Note.published_at.desc(), Note.id.desc())
+    )
+
+
+def _note_card(n: Note) -> PublicNoteCard:
+    return PublicNoteCard(
+        id=n.id, title=n.title, slug=n.slug, summary=n.summary, tags=n.tags or [], cover_url=n.cover_url,
+        published_at=n.published_at, reading_minutes=n.reading_minutes,
+    )
+
+
 def _resume(db: Session) -> PublicResume | None:
     r = db.scalars(select(Resume).where(Resume.is_active.is_(True)).order_by(Resume.id.desc())).first()
     return PublicResume(title=r.title, file_url=r.file_url, updated_at=r.updated_at) if r else None
@@ -147,6 +169,8 @@ def portfolio(db: Session = Depends(get_db)):
             (Experience.is_current.desc(), Experience.sort_order, Experience.start_year.desc()),
         ),
         achievements=_simple(db, Achievement, AchievementRead, (Achievement.sort_order, Achievement.year.desc().nulls_last())),
+        testimonials=_simple(db, Testimonial, TestimonialRead, (Testimonial.sort_order, Testimonial.id)),
+        notes=[_note_card(n) for n in db.scalars(_published_notes_query().limit(3)).all()],
         resume=_resume(db),
     )
 
@@ -247,6 +271,30 @@ def resume(db: Session = Depends(get_db)):
     return _resume(db)
 
 
+@router.get("/testimonials", response_model=list[TestimonialRead])
+def testimonials(db: Session = Depends(get_db)):
+    return _simple(db, Testimonial, TestimonialRead, (Testimonial.sort_order, Testimonial.id))
+
+
+@router.get("/notes", response_model=list[PublicNoteCard])
+def notes(tag: str | None = Query(None, max_length=60), db: Session = Depends(get_db)):
+    items = [_note_card(n) for n in db.scalars(_published_notes_query()).all()]
+    if tag:
+        items = [n for n in items if tag.lower() in (t.lower() for t in n.tags)]
+    return items
+
+
+@router.get("/notes/{slug}", response_model=PublicNote)
+def note_detail(slug: str, db: Session = Depends(get_db)):
+    n = db.scalars(_published_notes_query().where(Note.slug == slug)).first()
+    if not n:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Note not found")
+    return PublicNote(
+        id=n.id, title=n.title, slug=n.slug, summary=n.summary, content=n.content, tags=n.tags or [],
+        cover_url=n.cover_url, published_at=n.published_at, updated_at=n.updated_at, reading_minutes=n.reading_minutes,
+    )
+
+
 @router.get("/sitemap")
 def sitemap_data(db: Session = Depends(get_db)):
     rows = db.execute(
@@ -260,4 +308,7 @@ def sitemap_data(db: Session = Depends(get_db)):
     return {
         "projects": [{"slug": s, "updated_at": u} for s, u in rows],
         "publications": [{"slug": s, "updated_at": u} for s, u in pubs],
+        "notes": [{"slug": s, "updated_at": u} for s, u in db.execute(
+            select(Note.slug, Note.updated_at).where(Note.is_published.is_(True), Note.deleted_at.is_(None))
+        ).all()],
     }

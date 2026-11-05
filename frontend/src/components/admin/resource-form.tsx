@@ -10,7 +10,7 @@ import { z } from "zod";
 import { api, ApiError } from "@/lib/admin/client";
 import type { FieldDef, ResourceDef } from "@/lib/admin/resources";
 import { cn } from "@/lib/utils";
-import { FieldShell, GalleryField, IconPicker, LinksField, ListInput, MediaField, RelationSelect, TagsInput } from "./fields";
+import { FieldShell, GalleryField, IconPicker, LinksField, ListInput, MarkdownField, MediaField, RelationSelect, TagsInput } from "./fields";
 import { Card, PageHeader, Spinner, Switch, useToast } from "./ui";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -143,7 +143,7 @@ export function ResourceForm({ def, item }: { def: ResourceDef; item?: Values | 
               {fields.map((f) => {
                 const id = `f-${f.name}`;
                 const err = (errors[f.name]?.message as string | undefined) ?? (Array.isArray(errors[f.name]) ? "Check the entries above" : undefined);
-                const span = f.span === 2 || ["textarea", "list", "tags", "gallery", "links", "image", "pdf", "icon"].includes(f.type) ? "md:col-span-2" : "";
+                const span = f.span === 2 || ["textarea", "markdown", "list", "tags", "gallery", "links", "image", "pdf", "icon"].includes(f.type) ? "md:col-span-2" : "";
                 if (f.type === "boolean") {
                   return (
                     <Controller key={f.name} name={f.name} control={control} render={({ field }) => (
@@ -183,6 +183,8 @@ export function ResourceForm({ def, item }: { def: ResourceDef; item?: Values | 
 
 export function renderInput(f: FieldDef, id: string, register: any, control: any, invalid: boolean) {
   switch (f.type) {
+    case "markdown":
+      return <Controller name={f.name} control={control} render={({ field }) => <MarkdownField id={id} value={field.value ?? ""} onChange={field.onChange} rows={f.rows ?? 14} maxLength={f.maxLength ?? 20000} invalid={invalid} />} />;
     case "textarea":
       return <textarea id={id} rows={f.rows ?? 4} className="field resize-y" aria-invalid={invalid} {...register(f.name)} />;
     case "number":

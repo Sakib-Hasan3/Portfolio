@@ -135,6 +135,33 @@ export interface Achievement {
   url: string | null;
 }
 
+export interface Testimonial {
+  id: number;
+  author_name: string;
+  author_role: string | null;
+  organization: string | null;
+  relationship: string | null;
+  quote: string;
+  avatar_url: string | null;
+  source_url: string | null;
+}
+
+export interface NoteCard {
+  id: number;
+  title: string;
+  slug: string;
+  summary: string;
+  tags: string[];
+  cover_url: string | null;
+  published_at: string;
+  reading_minutes: number;
+}
+
+export interface Note extends NoteCard {
+  content: string;
+  updated_at: string;
+}
+
 export interface Portfolio {
   profile: Profile | null;
   settings: SiteSettings | null;
@@ -145,6 +172,8 @@ export interface Portfolio {
   education: Education[];
   experience: Experience[];
   achievements: Achievement[];
+  testimonials: Testimonial[];
+  notes: NoteCard[];
   resume: { title: string; file_url: string; updated_at: string } | null;
 }
 

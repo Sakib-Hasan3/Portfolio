@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.models import AdminUser, Profile, WebsiteSettings
 from app.schemas.content import ProfileRead, ProfileUpdate, WebsiteSettingsRead, WebsiteSettingsUpdate
 from app.services.activity import log_activity
-from app.services.revalidation import revalidate
+from app.services.assistant.sync import content_changed
 
 router = APIRouter(tags=["admin:singletons"])
 
@@ -51,7 +51,7 @@ def update_profile(
     section = "about" if set(data) <= {"about_title", "about_summary", "about_highlights"} else "profile"
     log_activity(db, user, "update", section, profile.id, f"Updated {section}")
     db.commit()
-    bg.add_task(revalidate, ("profile",))
+    bg.add_task(content_changed, ("profile",))
     return profile
 
 
@@ -79,5 +79,5 @@ def update_settings(
         setattr(row, key, value)
     log_activity(db, user, "update", "settings", row.id, "Updated website settings")
     db.commit()
-    bg.add_task(revalidate, ("settings",))
+    bg.add_task(content_changed, ("settings",))
     return row

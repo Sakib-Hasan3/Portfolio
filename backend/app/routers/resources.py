@@ -6,16 +6,18 @@ from app.models import (
     Achievement,
     Education,
     Experience,
+    Note,
     Project,
     Publication,
     Resume,
     Skill,
     SkillCategory,
     SocialLink,
+    Testimonial,
 )
 from app.routers.factory import build_admin_router
 from app.schemas import content as s
-from app.services.content import ProjectService, ResumeService, SkillCategoryService, SkillService
+from app.services.content import NoteService, ProjectService, ResumeService, SkillCategoryService, SkillService
 from app.services.crud import ResourceConfig
 
 RESOURCES: list[ResourceConfig] = [
@@ -71,6 +73,18 @@ RESOURCES: list[ResourceConfig] = [
         create_schema=s.SocialLinkCreate, update_schema=s.SocialLinkUpdate, read_schema=s.SocialLinkRead,
         search_fields=("platform", "label", "url"), filter_fields={"is_published": bool, "platform": str},
         revalidate_tags=("social",), title_field="label",
+    ),
+    ResourceConfig(
+        name="testimonials", label="Testimonial", model=Testimonial,
+        create_schema=s.TestimonialCreate, update_schema=s.TestimonialUpdate, read_schema=s.TestimonialRead,
+        search_fields=("author_name", "organization", "quote"), filter_fields={"is_published": bool},
+        revalidate_tags=("testimonials",), title_field="author_name",
+    ),
+    ResourceConfig(
+        name="notes", label="Note", model=Note,
+        create_schema=s.NoteCreate, update_schema=s.NoteUpdate, read_schema=s.NoteRead,
+        search_fields=("title", "summary", "content"), filter_fields={"is_published": bool},
+        order_by=("id",), revalidate_tags=("notes",), slug_from="title", service_cls=NoteService,
     ),
     ResourceConfig(
         name="resumes", label="Resume", model=Resume,

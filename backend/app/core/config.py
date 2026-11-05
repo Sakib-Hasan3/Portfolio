@@ -68,6 +68,16 @@ class Settings(BaseSettings):
     SMTP_USE_TLS: bool = True
     NOTIFY_EMAIL: str | None = None
 
+    # AI assistant. Keys are read from the environment only and never exposed to the browser.
+    GROQ_API_KEY: str | None = None
+    OPENAI_API_KEY: str | None = None
+    LLM_BASE_URL: str | None = None  # "custom" provider: any OpenAI-compatible /chat/completions endpoint
+    LLM_API_KEY: str | None = None
+    EMBEDDING_BASE_URL: str | None = None  # used when the embedding provider is "openai"
+    EMBEDDING_API_KEY: str | None = None
+    ASSISTANT_LLM_TIMEOUT_SECONDS: float = 40.0
+    ASSISTANT_LOG_RETENTION_DAYS: int = 90
+
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def split_origins(cls, v):

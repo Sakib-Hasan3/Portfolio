@@ -307,6 +307,66 @@ class AchievementRead(AchievementCreate, TimestampedRead):
     pass
 
 
+class TestimonialCreate(PublishFields):
+    author_name: str = Field(min_length=1, max_length=120)
+    author_role: OptStr = Field(default=None, max_length=160)
+    organization: OptStr = Field(default=None, max_length=200)
+    relationship: OptStr = Field(default=None, max_length=80)
+    quote: str = Field(min_length=1, max_length=2000)
+    avatar_url: SafeUrl = None
+    source_url: SafeUrl = None
+
+
+TestimonialUpdate = make_partial(TestimonialCreate, "TestimonialUpdate")
+
+
+class TestimonialRead(TestimonialCreate, TimestampedRead):
+    pass
+
+
+class NoteCreate(PublishFields):
+    title: str = Field(min_length=1, max_length=240)
+    slug: Slug = None
+    summary: str = Field(default="", max_length=500)
+    content: str = Field(default="", max_length=60000)
+    tags: StrList = []
+    cover_url: SafeUrl = None
+    published_at: datetime | None = None
+
+
+NoteUpdate = make_partial(NoteCreate, "NoteUpdate")
+
+
+class NoteRead(NoteCreate, TimestampedRead):
+    slug: str
+    published_at: datetime
+    reading_minutes: int = 1
+
+
+class PublicNote(BaseModel):
+    id: int
+    title: str
+    slug: str
+    summary: str
+    content: str
+    tags: list[str]
+    cover_url: str | None
+    published_at: datetime
+    updated_at: datetime
+    reading_minutes: int
+
+
+class PublicNoteCard(BaseModel):
+    id: int
+    title: str
+    slug: str
+    summary: str
+    tags: list[str]
+    cover_url: str | None
+    published_at: datetime
+    reading_minutes: int
+
+
 class SocialLinkCreate(PublishFields):
     platform: str = Field(min_length=1, max_length=60)
     label: str = Field(min_length=1, max_length=120)
@@ -463,6 +523,8 @@ class PortfolioBundle(BaseModel):
     education: list[EducationRead]
     experience: list[ExperienceRead]
     achievements: list[AchievementRead]
+    testimonials: list[TestimonialRead] = []
+    notes: list[PublicNoteCard] = []
     resume: PublicResume | None
 
 

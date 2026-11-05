@@ -4,7 +4,7 @@
  */
 
 export type FieldType =
-  | "text" | "textarea" | "number" | "boolean" | "select" | "url" | "slug"
+  | "text" | "textarea" | "markdown" | "number" | "boolean" | "select" | "url" | "slug"
   | "tags" | "list" | "image" | "pdf" | "relation" | "links" | "gallery" | "icon" | "visibility";
 
 export interface FieldDef {
@@ -105,7 +105,7 @@ export const RESOURCES: Record<string, ResourceDef> = {
       { name: "slug", label: "URL slug", type: "slug", help: "Leave empty to generate from the title.", section: "Basics" },
       { name: "category", label: "Category", type: "text", required: true, maxLength: 80, placeholder: "e.g. Computer Vision", section: "Basics" },
       { name: "short_description", label: "Short description", type: "textarea", required: true, maxLength: 500, rows: 3, span: 2, help: "Shown on project cards.", section: "Basics" },
-      { name: "description", label: "Detailed description", type: "textarea", rows: 8, maxLength: 20000, span: 2, help: "Plain text. Blank lines start new paragraphs; lines starting with “- ” become bullets.", section: "Details" },
+      { name: "description", label: "Detailed description", type: "markdown", rows: 14, maxLength: 20000, span: 2, help: "Markdown supported: # headings, **bold**, lists, tables, code blocks, links and images. Type here, paste, or upload a .md file.", section: "Details" },
       { name: "highlights", label: "Highlights", type: "list", span: 2, help: "One point per line.", section: "Details" },
       { name: "technologies", label: "Technologies", type: "tags", span: 2, help: "Press Enter or comma after each.", section: "Details" },
       {
@@ -275,6 +275,58 @@ export const RESOURCES: Record<string, ResourceDef> = {
       { name: "is_current", label: "I currently hold this role", type: "boolean", defaultValue: false },
       { name: "description", label: "Description", type: "textarea", rows: 3, maxLength: 4000, span: 2 },
       { name: "highlights", label: "Responsibilities & outcomes", type: "list", span: 2, help: "One per line." },
+      ...PUBLISH,
+    ],
+  },
+
+  testimonials: {
+    name: "testimonials",
+    label: "Testimonial",
+    plural: "Testimonials",
+    description: "Quotes from supervisors, teammates or clients. Only add words the person actually said or wrote. The section is hidden while this is empty.",
+    titleKey: "author_name",
+    subtitleKey: "organization",
+    publishable: true,
+    searchPlaceholder: "Search testimonials",
+    columns: [
+      { key: "author_name", label: "Name" },
+      { key: "organization", label: "Organisation" },
+      { key: "relationship", label: "Relationship" },
+    ],
+    filters: [publishedFilter],
+    fields: [
+      { name: "author_name", label: "Name", type: "text", required: true, maxLength: 120 },
+      { name: "relationship", label: "Relationship", type: "text", maxLength: 80, placeholder: "Supervisor, Teammate, Client…" },
+      { name: "author_role", label: "Their role", type: "text", maxLength: 160 },
+      { name: "organization", label: "Organisation", type: "text", maxLength: 200 },
+      { name: "quote", label: "Quote", type: "textarea", required: true, rows: 5, maxLength: 2000, span: 2 },
+      { name: "source_url", label: "Source link", type: "url", span: 2, help: "Optional: e.g. the LinkedIn recommendation, so visitors can verify it." },
+      { name: "avatar_url", label: "Photo", type: "image", purpose: "avatar", span: 2 },
+      ...PUBLISH,
+    ],
+  },
+
+  notes: {
+    name: "notes",
+    label: "Note",
+    plural: "Notes",
+    description: "Technical write-ups shown under /notes. Write in Markdown or upload a .md file.",
+    titleKey: "title",
+    subtitleKey: "summary",
+    publishable: true,
+    searchPlaceholder: "Search notes",
+    columns: [
+      { key: "title", label: "Title" },
+      { key: "tags", label: "Tags", kind: "list" },
+    ],
+    filters: [publishedFilter],
+    fields: [
+      { name: "title", label: "Title", type: "text", required: true, maxLength: 240, span: 2, section: "Basics" },
+      { name: "slug", label: "URL slug", type: "slug", span: 2, help: "Leave empty to generate it from the title.", section: "Basics" },
+      { name: "summary", label: "Summary", type: "textarea", rows: 3, maxLength: 500, span: 2, help: "Shown on cards and in link previews.", section: "Basics" },
+      { name: "tags", label: "Tags", type: "tags", span: 2, section: "Basics" },
+      { name: "content", label: "Content", type: "markdown", rows: 22, maxLength: 60000, span: 2, help: "Markdown supported. Type, paste, or upload a .md file.", section: "Write" },
+      { name: "cover_url", label: "Cover image", type: "image", purpose: "note-cover", span: 2, section: "Media" },
       ...PUBLISH,
     ],
   },

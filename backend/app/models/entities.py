@@ -221,6 +221,36 @@ class SocialLink(IdMixin, TimestampMixin, PublishableMixin, Base):
     show_in_hero: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, server_default="false")
 
 
+class Testimonial(IdMixin, TimestampMixin, PublishableMixin, Base):
+    __tablename__ = "testimonials"
+
+    author_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    author_role: Mapped[str | None] = mapped_column(String(160))
+    organization: Mapped[str | None] = mapped_column(String(200))
+    relationship: Mapped[str | None] = mapped_column(String(80))  # e.g. Supervisor, Teammate
+    quote: Mapped[str] = mapped_column(Text, nullable=False)
+    avatar_url: Mapped[str | None] = mapped_column(String(1024))
+    source_url: Mapped[str | None] = mapped_column(String(1024))  # e.g. link to the LinkedIn recommendation
+
+
+class Note(IdMixin, TimestampMixin, PublishableMixin, SoftDeleteMixin, Base):
+    """A short technical write-up (Markdown) shown under /notes."""
+
+    __tablename__ = "notes"
+
+    title: Mapped[str] = mapped_column(String(240), nullable=False)
+    slug: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
+    summary: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    content: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    tags: Mapped[list] = mapped_column(JSONType, default=list, nullable=False)
+    cover_url: Mapped[str | None] = mapped_column(String(1024))
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, nullable=False, index=True)
+
+    @property
+    def reading_minutes(self) -> int:
+        return max(1, round(len((self.content or "").split()) / 200))
+
+
 # ---------------------------------------------------------------- media & resume
 
 

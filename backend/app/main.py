@@ -1,4 +1,5 @@
 import logging
+import threading
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI
@@ -13,8 +14,9 @@ from app.core.logging import configure_logging
 from app.core.security import hash_password
 from app.middleware.security import RequestContextMiddleware, SecurityHeadersMiddleware
 from app.models import AdminUser
-from app.routers import admin_singletons, auth, contact, dashboard, media, public
+from app.routers import admin_singletons, assistant, auth, contact, dashboard, media, public
 from app.routers.resources import build_resources_router
+from app.services.assistant.knowledge import reindex_safe
 
 configure_logging()
 log = logging.getLogger("app")
@@ -45,6 +47,8 @@ async def lifespan(_: FastAPI):
         bootstrap_admin()
     except Exception:  # noqa: BLE001 – tables may not exist yet before migrations
         log.exception("admin bootstrap skipped")
+    if settings.ENVIRONMENT != "test":  # keep the AI knowledge base in step with the database after every (re)start
+        threading.Thread(target=reindex_safe, name="assistant-startup-index", daemon=True).start()
     yield
 
 
@@ -77,6 +81,7 @@ api = APIRouter(prefix=settings.API_V1_PREFIX)
 api.include_router(auth.router)
 api.include_router(public.router)
 api.include_router(contact.public_router, prefix="/public")
+api.include_router(assistant.public_router)
 
 admin = APIRouter(prefix="/admin")
 admin.include_router(dashboard.router)
@@ -84,6 +89,7 @@ admin.include_router(admin_singletons.router)
 admin.include_router(build_resources_router())
 admin.include_router(media.router)
 admin.include_router(contact.admin_router)
+admin.include_router(assistant.admin_router)
 api.include_router(admin)
 
 app.include_router(api)

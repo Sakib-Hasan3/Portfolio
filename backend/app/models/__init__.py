@@ -1,3 +1,4 @@
+from app.models.assistant import AssistantMessageLog, AssistantSettings, KnowledgeChunk
 from app.models.base import Base
 from app.models.entities import (
     Achievement,
@@ -7,6 +8,7 @@ from app.models.entities import (
     Education,
     Experience,
     MediaAsset,
+    Note,
     Profile,
     Project,
     ProjectImage,
@@ -16,6 +18,7 @@ from app.models.entities import (
     Skill,
     SkillCategory,
     SocialLink,
+    Testimonial,
     WebsiteSettings,
 )
 
@@ -23,10 +26,14 @@ __all__ = [
     "Base",
     "Achievement",
     "ActivityLog",
+    "AssistantMessageLog",
+    "AssistantSettings",
+    "KnowledgeChunk",
     "AdminUser",
     "ContactMessage",
     "Education",
     "Experience",
+    "Note",
     "MediaAsset",
     "Profile",
     "Project",
@@ -37,5 +44,6 @@ __all__ = [
     "Skill",
     "SkillCategory",
     "SocialLink",
+    "Testimonial",
     "WebsiteSettings",
 ]

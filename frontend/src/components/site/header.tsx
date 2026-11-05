@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
+import { LangToggle } from "./lang-toggle";
 
 export type NavItem = { href: string; label: string };
 
@@ -35,7 +36,7 @@ export function SiteHeader({ name, nav, resumeUrl }: { name: string; nav: NavIte
     <header
       className={cn(
         "sticky top-0 z-40 border-b transition-colors duration-200",
-        scrolled ? "border-line bg-bg/80 backdrop-blur-md" : "border-transparent bg-bg",
+        scrolled ? "border-line bg-bg/80 backdrop-blur-md" : "border-transparent bg-transparent",
       )}
     >
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2">
@@ -62,6 +63,7 @@ export function SiteHeader({ name, nav, resumeUrl }: { name: string; nav: NavIte
         </nav>
 
         <div className="flex items-center gap-1">
+          <LangToggle />
           <ThemeToggle />
           {resumeUrl && (
             <a href={resumeUrl} className="btn btn-ghost hidden !py-1.5 text-sm md:inline-flex" download>

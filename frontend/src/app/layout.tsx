@@ -7,6 +7,8 @@ import "./globals.css";
 
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LangProvider } from "@/components/i18n-provider";
+import { getLang } from "@/lib/i18n-server";
 
 export const metadata: Metadata = {
   title: { default: "Portfolio", template: "%s" },
@@ -21,12 +23,13 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = await getLang();
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       <body className="min-h-dvh">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-          {children}
+          <LangProvider lang={lang}>{children}</LangProvider>
         </ThemeProvider>
       </body>
     </html>

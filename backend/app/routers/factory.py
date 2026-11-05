@@ -9,8 +9,8 @@ from app.api.deps import require_admin
 from app.core.database import get_db
 from app.models import AdminUser
 from app.schemas.common import Page
+from app.services.assistant.sync import content_changed
 from app.services.crud import CRUDService, ResourceConfig
-from app.services.revalidation import revalidate
 
 _TRUE = {"1", "true", "yes", "on"}
 _FALSE = {"0", "false", "no", "off"}
@@ -80,7 +80,7 @@ def build_admin_router(cfg: ResourceConfig) -> APIRouter:
     ):
         s = svc(db, user)
         obj = s.create(body)
-        bg.add_task(revalidate, cfg.revalidate_tags)
+        bg.add_task(content_changed, cfg.revalidate_tags)
         return s.serialize(obj)
 
     @router.patch("/{item_id}", response_model=ReadSchema)
@@ -93,7 +93,7 @@ def build_admin_router(cfg: ResourceConfig) -> APIRouter:
     ):
         s = svc(db, user)
         obj = s.update(item_id, body)
-        bg.add_task(revalidate, cfg.revalidate_tags)
+        bg.add_task(content_changed, cfg.revalidate_tags)
         return s.serialize(obj)
 
     if hasattr(cfg.model, "is_published"):
@@ -108,7 +108,7 @@ def build_admin_router(cfg: ResourceConfig) -> APIRouter:
         ):
             s = svc(db, user)
             obj = s.update(item_id, UpdateSchema(is_published=published))
-            bg.add_task(revalidate, cfg.revalidate_tags)
+            bg.add_task(content_changed, cfg.revalidate_tags)
             return s.serialize(obj)
 
     @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -120,7 +120,7 @@ def build_admin_router(cfg: ResourceConfig) -> APIRouter:
         user: AdminUser = Depends(require_admin),
     ):
         svc(db, user).delete(item_id, hard=hard)
-        bg.add_task(revalidate, cfg.revalidate_tags)
+        bg.add_task(content_changed, cfg.revalidate_tags)
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     if hasattr(cfg.model, "deleted_at"):
@@ -131,7 +131,7 @@ def build_admin_router(cfg: ResourceConfig) -> APIRouter:
         ):
             s = svc(db, user)
             obj = s.restore(item_id)
-            bg.add_task(revalidate, cfg.revalidate_tags)
+            bg.add_task(content_changed, cfg.revalidate_tags)
             return s.serialize(obj)
 
     return router
