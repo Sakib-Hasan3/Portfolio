@@ -8,37 +8,39 @@ import type { Portfolio } from "@/lib/types";
 import { HeroVisual } from "./hero-visual";
 import { SocialIcon } from "./icons";
 import { useT } from "@/components/i18n-provider";
+import { useEffect, useState } from "react";
+import { useIdleReady } from "@/lib/use-idle";
+import { hasWebGL } from "@/lib/webgl";
+import { Photo } from "./photo";
 
 const HeroScene = dynamic(() => import("./hero-scene"), { ssr: false, loading: () => null });
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 28 },
+  initial: { opacity: 1, y: 22 }, // stays visible at first paint (LCP); only lifts into place once JS is ready
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.65, ease: EASE, delay },
 });
 
 export function Hero({ data }: { data: Portfolio }) {
   const t = useT();
+  const ready = useIdleReady();
+  const [gl, setGl] = useState(false);
+  useEffect(() => setGl(hasWebGL()), []);
   const p = data.profile!;
   const heroLinks = data.social_links.filter((l) => l.show_in_hero);
 
   return (
     <section className="relative container-x pb-16 pt-10 md:pb-24 md:pt-16 overflow-hidden" aria-labelledby="hero-title">
-      <HeroScene />
+      {ready && gl && <HeroScene />}
       <div className="grid items-center gap-12 lg:grid-cols-12">
         <div className="relative z-10 lg:col-span-7">
           <motion.div {...fadeUp(0)} className="flex items-center gap-4">
             {p.avatar_url ? (
-              <img
-                src={p.avatar_url}
-                alt={`Portrait of ${p.full_name}`}
-                width={72}
-                height={72}
-                className="size-[72px] rounded-2xl border border-line object-cover object-[50%_30%]"
-                fetchPriority="high"
-              />
+              <span className="relative block size-24 shrink-0 overflow-hidden rounded-2xl border border-line shadow-[var(--shadow)] ring-2 ring-accent/30">
+                <Photo src={p.avatar_url} alt={`Portrait of ${p.full_name}`} width={192} height={240} priority className="size-full origin-[50%_26%] scale-[1.85] object-cover object-[50%_0%]" />
+              </span>
             ) : null}
             <div className="text-sm">
               {p.location ? (

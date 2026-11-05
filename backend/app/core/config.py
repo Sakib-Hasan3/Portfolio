@@ -21,6 +21,8 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_URL: str = "postgresql+psycopg://portfolio:portfolio@localhost:5432/portfolio"
+    DB_POOL_SIZE: int = 5  # free hosted databases allow few connections
+    DB_MAX_OVERFLOW: int = 5
 
     # Security
     SECRET_KEY: str = Field(default="change-me-in-production-please-use-a-long-random-string", min_length=32)
@@ -77,6 +79,17 @@ class Settings(BaseSettings):
     EMBEDDING_API_KEY: str | None = None
     ASSISTANT_LLM_TIMEOUT_SECONDS: float = 40.0
     ASSISTANT_LOG_RETENTION_DAYS: int = 90
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def normalise_database_url(cls, v):
+        """Hosts (Neon, Render, Heroku…) hand out postgres:// or postgresql:// URLs; SQLAlchemy needs the psycopg driver."""
+        if isinstance(v, str):
+            v = v.strip()
+            for prefix in ("postgres://", "postgresql://"):
+                if v.startswith(prefix):
+                    return "postgresql+psycopg://" + v[len(prefix):]
+        return v
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod

@@ -1,5 +1,6 @@
 """Public chat endpoints and the admin management API for the AI assistant."""
 
+import re
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, status
@@ -109,6 +110,7 @@ async def chat(body: ChatRequest, request: Request, db: Session = Depends(get_db
             done = payload
         elif event == "error":
             raise HTTPException(status.HTTP_502_BAD_GATEWAY, payload["message"])
+    answer = re.sub(r"\s*【[^】]*】", "", answer)  # some models append source markers
     return {"answer": answer, "sources": meta.get("sources", []), "cta": meta.get("cta"),
             "suggestions": done.get("suggestions", []), "status": done.get("status", "ok")}
 

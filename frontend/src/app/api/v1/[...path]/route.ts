@@ -2,6 +2,8 @@ import type { NextRequest } from "next/server";
 import { proxy } from "@/lib/api/proxy";
 
 export const dynamic = "force-dynamic";
+// Long enough for a sleeping free-tier API to wake up, and for streamed AI answers (ignored by self-hosted Node).
+export const maxDuration = 60;
 
 type Ctx = { params: Promise<{ path: string[] }> };
 

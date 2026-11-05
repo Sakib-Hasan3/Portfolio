@@ -37,7 +37,6 @@ function renderInline(text: string, key = "i"): React.ReactNode[] {
       const src = safeUrl(m[4], { image: true });
       out.push(
         src ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img key={k} src={src} alt={m[3]} loading="lazy" className="my-3 max-h-[28rem] rounded-lg border border-line" />
         ) : (
           m[3]

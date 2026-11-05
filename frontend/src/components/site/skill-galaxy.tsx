@@ -61,7 +61,12 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // ---------------------------------------------------------- renderer & scene
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
+    } catch {
+      return; // WebGL unavailable: the page works without the 3D scene
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.domElement.className = "absolute inset-0 size-full";

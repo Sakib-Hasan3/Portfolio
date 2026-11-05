@@ -47,8 +47,13 @@ export default function HeroScene() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
+    } catch {
+      return; // WebGL unavailable: the page works without the 3D scene
+    }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.domElement.className = "absolute inset-0 size-full";
     renderer.domElement.setAttribute("aria-hidden", "true");
@@ -212,7 +217,13 @@ export default function HeroScene() {
     const floatFreqs = shapeConfigs.map(() => rand(0.4, 1.1));
     const floatOffsets = shapeConfigs.map(() => rand(0, Math.PI * 2));
 
+    let visible = true;
+    let running = true;
     const frame = (now: number) => {
+      if (!visible || document.hidden) {
+        running = false; // paused: restarted by the observer below
+        return;
+      }
       const t = (now - t0) / 1000;
       if (!reduce) {
         targetX += (mouseX - targetX) * 0.03;
@@ -260,8 +271,22 @@ export default function HeroScene() {
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
+    const resume = () => {
+      if (!running && visible && !document.hidden) {
+        running = true;
+        raf = requestAnimationFrame(frame);
+      }
+    };
+    const vis = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      resume();
+    });
+    vis.observe(wrap);
+    document.addEventListener("visibilitychange", resume);
 
     return () => {
+      vis.disconnect();
+      document.removeEventListener("visibilitychange", resume);
       cancelAnimationFrame(raf);
       ro.disconnect();
       mo.disconnect();

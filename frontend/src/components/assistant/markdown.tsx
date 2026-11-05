@@ -39,6 +39,7 @@ function inline(text: string, allowed: Set<string>, onNavigate: () => void, keyP
 
 export function AnswerMarkdown({ text, allowedUrls, onNavigate }: { text: string; allowedUrls: string[]; onNavigate: () => void }) {
   const allowed = new Set(allowedUrls);
+  text = text.replace(/\s*【[^】]*】/g, ""); // some models append source markers; sources are shown as chips instead
   const blocks: { type: "p" | "ul" | "ol"; lines: string[] }[] = [];
   for (const raw of text.split("\n")) {
     const line = raw.trimEnd();

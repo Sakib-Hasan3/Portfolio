@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowUpRight, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Project } from "@/lib/types";
+import { Photo } from "./photo";
 import { cn } from "@/lib/utils";
 import { GitHubIcon } from "./icons";
 import { Tilt } from "./tilt";
@@ -14,12 +15,7 @@ const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 export function ProjectCover({ project, className, max = 6 }: { project: Project; className?: string; max?: number }) {
   if (project.thumbnail_url) {
     return (
-      <img
-        src={project.thumbnail_url}
-        alt={`${project.title} preview`}
-        loading="lazy"
-        className={cn("size-full object-cover", className)}
-      />
+      <Photo src={project.thumbnail_url} alt={`${project.title} preview`} width={800} height={450} sizes="(min-width: 1024px) 560px, (min-width: 640px) 50vw, 100vw" className={cn("size-full object-cover", className)} />
     );
   }
   // The stack itself, typeset large: an honest stand-in until a screenshot is uploaded.

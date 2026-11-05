@@ -11,7 +11,7 @@ engine = create_engine(
     settings.DATABASE_URL,
     pool_pre_ping=True,
     connect_args=_connect_args,
-    **({} if settings.DATABASE_URL.startswith("sqlite") else {"pool_size": 10, "max_overflow": 20}),
+    **({} if settings.DATABASE_URL.startswith("sqlite") else {"pool_size": settings.DB_POOL_SIZE, "max_overflow": settings.DB_MAX_OVERFLOW}),
 )
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 

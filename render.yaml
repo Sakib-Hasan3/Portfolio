@@ -1,0 +1,37 @@
+# Render Blueprint: the FastAPI backend on Render's free web tier.
+#   Render dashboard -> New -> Blueprint -> pick this repo. Values marked sync:false are asked for during setup.
+# The website itself is deployed separately on Vercel (see docs/FREE_HOSTING.md).
+services:
+  - type: web
+    name: portfolio-api
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: WEB_CONCURRENCY      # free instances have 512 MB of RAM
+        value: "1"
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: STORAGE_BACKEND      # free instances have no persistent disk -> uploads live on Cloudinary
+        value: cloudinary
+      - key: SEED_ON_START
+        value: "false"
+      - key: DATABASE_URL         # Neon connection string
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: SECRET_KEY           # python3 -c "import secrets;print(secrets.token_urlsafe(48))"
+        sync: false
+      - key: REVALIDATE_SECRET    # must equal REVALIDATE_SECRET on Vercel
+        sync: false
+      - key: FRONTEND_URL         # your Vercel URL, e.g. https://your-portfolio.vercel.app
+        sync: false
+      - key: CORS_ORIGINS         # JSON list, e.g. ["https://your-portfolio.vercel.app"]
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false

@@ -205,12 +205,12 @@ export function AssistantWidget() {
             exit={{ opacity: 0, y: 12, scale: 0.92 }}
             whileHover={reduce ? undefined : { y: -2 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            className="ai-fab group fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-40 flex items-center gap-2.5 rounded-full py-2.5 pl-3 pr-4 sm:bottom-6 sm:right-6"
+            className="ai-fab group fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-40 flex items-center gap-2.5 rounded-full py-2.5 pl-3 pr-4 max-[420px]:p-2.5 sm:bottom-6 sm:right-6"
           >
             <span className="ai-fab-icon relative grid size-8 place-items-center rounded-full">
               <Sparkles className="size-[18px]" aria-hidden />
             </span>
-            <span className="text-sm font-medium tracking-tight">{name}</span>
+            <span className="max-w-[9.5rem] truncate text-sm font-medium tracking-tight max-[420px]:hidden">{name}</span>
           </motion.button>
         )}
       </AnimatePresence>

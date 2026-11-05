@@ -59,6 +59,14 @@ your **published** content. Edit anything in `/admin` and the assistant's knowle
 re-indexing, no redeploy). Set `GROQ_API_KEY` in `.env`, then manage it at `/admin/assistant`.
 See [docs/ASSISTANT.md](docs/ASSISTANT.md) for architecture, safety rules and the API.
 
+## More sections
+
+- **Testimonials** and **Notes** (blog, Markdown) are managed in the admin like everything else; each section hides itself while empty.
+  Both are also indexed by the AI assistant.
+- **/cv** is a print-ready CV generated from the same data as the site (use *Print / Save as PDF*).
+- **English / বাংলা** toggle in the header translates the interface; portfolio content is shown as written in the admin.
+- Every project, paper and note gets its own social-share image automatically.
+
 ## 3-D and motion
 
 - **Hero:** a WebGL scene (three.js, loaded only on the home page) built from your skills in the CMS. Points fly in and

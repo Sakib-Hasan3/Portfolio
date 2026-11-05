@@ -346,3 +346,11 @@ def test_provider_timeout_degrades_gracefully(client, db, monkeypatch):
     _mock_provider(monkeypatch, handler)
     events = _parse_sse(client.post(CHAT, json={"message": "What is StrokeGuardian?"}).text)
     assert events[-1][1]["status"] == "fallback"
+
+
+def test_hosted_database_urls_are_normalised_for_psycopg():
+    from app.core.config import Settings
+
+    for raw in ("postgres://u:p@h/db?sslmode=require", "postgresql://u:p@h/db?sslmode=require"):
+        assert Settings(DATABASE_URL=raw).DATABASE_URL == "postgresql+psycopg://u:p@h/db?sslmode=require"
+    assert Settings(DATABASE_URL="sqlite:///x.db").DATABASE_URL == "sqlite:///x.db"

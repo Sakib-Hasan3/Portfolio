@@ -64,7 +64,7 @@ export default async function CvPage() {
           <ul className="space-y-2.5">{data.projects.map((x) => (
             <li key={x.id}><div className="flex justify-between gap-4"><strong>{x.title}</strong><span className="shrink-0 text-neutral-600">{x.period_label || x.year || ""}</span></div>
               <div>{x.short_description}</div>
-              {x.technologies.length > 0 && <div className="text-[9.5pt] text-neutral-600">{x.technologies.join(" · ")}</div>}</li>))}</ul></>)}
+              {x.technologies.length > 0 && <div className="text-[9.5pt] text-neutral-600">{x.technologies.slice(0, 8).join(" · ")}</div>}</li>))}</ul></>)}
 
         {skills.length > 0 && (<><H>Skills</H>
           <dl className="space-y-1">{skills.map((c) => (

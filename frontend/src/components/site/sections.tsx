@@ -1,6 +1,8 @@
 import { Check, ExternalLink, GraduationCap } from "lucide-react";
 import { useT } from "@/components/i18n-provider";
 import { Markdown } from "./markdown";
+import { Photo } from "./photo";
+import { Tilt } from "./tilt";
 import type { Achievement, Education, Experience, Portfolio, SkillCategory } from "@/lib/types";
 import { yearSpan } from "@/lib/utils";
 import { CategoryIcon } from "./icons";
@@ -25,6 +27,8 @@ export function About({ data }: { data: Portfolio }) {
 
   return (
     <Section id="about" title={p.about_title || "About"}>
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-12">
+        <div className="min-w-0">
       <RichText text={p.about_summary} className="max-w-[65ch] text-lg leading-relaxed" />
       {p.about_highlights.length > 0 && (
         <ul className="mt-10 grid gap-x-8 gap-y-3 sm:grid-cols-2">
@@ -46,6 +50,21 @@ export function About({ data }: { data: Portfolio }) {
           ))}
         </dl>
       )}
+        </div>
+        {p.avatar_url && (
+          <aside className="order-first mx-auto w-full max-w-[17rem] lg:order-none lg:max-w-none">
+            <Tilt className="rounded-3xl" max={5}>
+              <figure className="relative overflow-hidden rounded-3xl border border-line bg-surface shadow-[var(--shadow-xl)]">
+                <Photo src={p.avatar_url} alt={`Portrait of ${p.full_name}`} width={640} height={800} sizes="(min-width: 1024px) 272px, 272px" className="aspect-[4/5] w-full object-cover" />
+                <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 pb-3 pt-10 text-sm text-white">
+                  <span className="font-medium">{p.full_name}</span>
+                  <span className="block text-xs text-white/75">{p.title}</span>
+                </figcaption>
+              </figure>
+            </Tilt>
+          </aside>
+        )}
+      </div>
     </Section>
   );
 }

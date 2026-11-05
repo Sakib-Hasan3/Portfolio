@@ -4,7 +4,7 @@ import { SocialIcon } from "./icons";
 
 export function SiteFooter({ name, text, links }: { name: string; text?: string | null; links: SocialLink[] }) {
   return (
-    <footer className="mt-24 border-t border-line">
+    <footer className="mt-24 border-t border-line pb-20 sm:pb-0">
       <div className="container-x flex flex-col gap-6 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
         <p>
           © {new Date().getFullYear()} {name}

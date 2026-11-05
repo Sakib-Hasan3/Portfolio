@@ -43,11 +43,12 @@ export function SiteHeader({ name, nav, resumeUrl }: { name: string; nav: NavIte
         Skip to content
       </a>
       <div className="container-x flex h-16 items-center justify-between gap-6">
-        <Link href="/" className="group flex items-center gap-3" aria-label={`${name}, home`}>
-          <span className="grid size-8 place-items-center rounded-lg bg-text font-display text-[13px] font-bold tracking-tight text-bg">
+        <Link href="/" className="group flex items-center gap-3">
+          <span aria-hidden className="grid size-8 place-items-center rounded-lg bg-text font-display text-[13px] font-bold tracking-tight text-bg">
             {initials}
           </span>
           <span className="hidden font-display text-[15px] font-semibold tracking-tight sm:inline">{name}</span>
+          <span className="sr-only sm:hidden">{name}</span>
         </Link>
 
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
