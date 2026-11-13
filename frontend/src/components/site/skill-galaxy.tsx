@@ -22,6 +22,10 @@ function gauss(r: () => number) {
 }
 const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 
+/** One clear colour per skill group (same order as the groups). Chosen to read on both light and dark backgrounds. */
+export const GROUP_COLORS = ["#6f86ee", "#2fa592", "#e0a93b", "#d36bb0", "#4fb3e8", "#9a7bdc", "#e2735b", "#7bb661"];
+const groupColor = (i: number) => GROUP_COLORS[i % GROUP_COLORS.length];
+
 function readColors() {
   const cs = getComputedStyle(document.documentElement);
   const get = (n: string, f: string) => cs.getPropertyValue(n).trim() || f;
@@ -53,7 +57,18 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
   const wrapRef = useRef<HTMLDivElement>(null);
   const labelRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [hover, setHover] = useState<Hover>(null);
-  const [activeCat, setActiveCat] = useState<number | null>(null);
+  const skillLabelRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const focusRef = useRef<number>(-1);
+  const kickRef = useRef<() => void>(() => {});
+  const [activeCat, setActiveCat] = useState<number | null>(null); // group under the pointer (from a node)
+  const [chipHover, setChipHover] = useState<number | null>(null);
+  const [pinned, setPinned] = useState<number | null>(null);
+  const focus = chipHover ?? activeCat ?? pinned;
+
+  useEffect(() => {
+    focusRef.current = focus ?? -1;
+    kickRef.current();
+  }, [focus]);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -75,7 +90,7 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-    camera.position.set(0, 0, reduce ? 12.5 : 16);
+    camera.position.set(0, 0, reduce ? 14 : 17.5);
     scene.add(new THREE.AmbientLight(0xffffff, 1.1));
     const key = new THREE.DirectionalLight(0xffffff, 1.6);
     key.position.set(4, 6, 8);
@@ -87,7 +102,7 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
 
     // ---------------------------------------------------------- layout
     const k = categories.length;
-    const R = 2.7;
+    const R = 3.4;
     const centers = categories.map((_, i) => {
       // Fibonacci sphere: evenly spread clusters in 3-D
       const y = k === 1 ? 0 : 1 - (i / (k - 1)) * 2;
@@ -100,7 +115,7 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
     const pts: P[] = [];
     categories.forEach((c, ci) =>
       c.skills.forEach((s) => {
-        const target = centers[ci].clone().add(new THREE.Vector3(gauss(r), gauss(r), gauss(r)).multiplyScalar(0.42));
+        const target = centers[ci].clone().add(new THREE.Vector3(gauss(r), gauss(r), gauss(r)).multiplyScalar(0.46));
         const start = new THREE.Vector3(gauss(r), gauss(r), gauss(r)).normalize().multiplyScalar(5 + r() * 3);
         pts.push({ cat: ci, name: s.name, start, target, pos: (reduce ? target : start).clone() });
       }),
@@ -154,18 +169,32 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
       return s;
     });
 
+    const tmpC = new THREE.Color();
+    let appliedFocus = -2;
+    const applyFocusColors = () => {
+      const f = focusRef.current;
+      appliedFocus = f;
+      pts.forEach((p, i) => {
+        tmpC.set(groupColor(p.cat));
+        // when a group is focused, the others fade toward the background
+        if (f >= 0 && p.cat !== f) tmpC.lerp(new THREE.Color(colors.dark ? 0x1a1d24 : 0xf2f4f8), 0.72);
+        mesh.setColorAt(i, tmpC);
+      });
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    };
+
     const paint = () => {
       const a = new THREE.Color(colors.accent);
       const d = new THREE.Color(colors.data);
-      pts.forEach((p, i) => mesh.setColorAt(i, p.cat % 3 === 1 ? d : a));
-      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      void a; void d;
+      applyFocusColors();
       mat.emissive = new THREE.Color(colors.dark ? 0x222244 : 0x000000);
       lineMat.color = new THREE.Color(colors.line);
       (shell.material as THREE.LineBasicMaterial).color = new THREE.Color(colors.faint);
       dustMat.color = new THREE.Color(colors.faint);
       halos.forEach((h, i) => {
         const m = h.material as THREE.SpriteMaterial;
-        m.color = i % 3 === 1 ? d : a;
+        m.color = new THREE.Color(groupColor(i));
         m.blending = colors.dark ? THREE.AdditiveBlending : THREE.NormalBlending;
         m.needsUpdate = true;
       });
@@ -270,7 +299,7 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
       const animating = t < 1;
 
       if (!reduce) {
-        camera.position.z = 16 - 3.5 * e;
+        camera.position.z = 17.5 - 3.5 * e;
         if (!state.dragging) {
           if (now > state.idleUntil) world.rotation.y += dt * (animating ? 0.55 * (1 - e) + 0.08 : 0.08);
           world.rotation.y += state.vx;
@@ -285,7 +314,9 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
       pts.forEach((p, i) => {
         p.pos.lerpVectors(p.start, p.target, e);
         if (drift) p.pos.y += Math.sin(now / 1800 + i) * drift * e;
-        const size = (i === state.hoverIdx ? 0.13 : 0.075) * (0.4 + 0.6 * e);
+        const f = focusRef.current;
+        const base = f < 0 ? 0.095 : p.cat === f ? 0.12 : 0.06;
+        const size = (i === state.hoverIdx ? 0.16 : base) * (0.4 + 0.6 * e);
         m4.compose(p.pos, q, scl.setScalar(size));
         mesh.setMatrixAt(i, m4);
       });
@@ -296,7 +327,12 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
       lineGeo.attributes.position.needsUpdate = true;
       lineMat.opacity = 0.55 * e;
       const labelAlpha = Math.max(0, (t - 0.6) / 0.4);
-      halos.forEach((h) => ((h.material as THREE.SpriteMaterial).opacity = (colors.dark ? 0.16 : 0.1) * e));
+      if (focusRef.current !== appliedFocus) applyFocusColors();
+      halos.forEach((h, i) => {
+        const f = focusRef.current;
+        const k2 = f < 0 ? 1 : i === f ? 1.6 : 0.25;
+        (h.material as THREE.SpriteMaterial).opacity = (colors.dark ? 0.2 : 0.14) * e * k2;
+      });
 
       // hover
       world.updateMatrixWorld();
@@ -322,10 +358,29 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
         v.copy(c).add(new THREE.Vector3(0, 0.75, 0)).applyMatrix4(world.matrixWorld);
         const depth = v.clone().applyMatrix4(camera.matrixWorldInverse).z; // more negative = further
         v.project(camera);
-        const near = THREE.MathUtils.clamp((-depth - 9) / -4 + 1, 0.25, 1);
-        node.style.transform = `translate(${(v.x * 0.5 + 0.5) * rect.width}px, ${(-v.y * 0.5 + 0.5) * rect.height}px) translate(-50%, -50%)`;
-        node.style.opacity = String(labelAlpha * near);
-        node.style.zIndex = String(Math.round(near * 10));
+        const near = THREE.MathUtils.clamp((-depth - 9) / -4 + 1, 0.6, 1);
+        // keep the label fully inside the box
+        const half = node.offsetWidth / 2 + 6;
+        const lx = THREE.MathUtils.clamp((v.x * 0.5 + 0.5) * rect.width, half, Math.max(half, rect.width - half));
+        const ly = THREE.MathUtils.clamp((-v.y * 0.5 + 0.5) * rect.height, 14, Math.max(14, rect.height - 14));
+        node.style.transform = `translate(${lx}px, ${ly}px) translate(-50%, -50%)`;
+        const fcs = focusRef.current;
+        node.style.opacity = String(labelAlpha * near * (fcs < 0 || fcs === i ? 1 : 0.35));
+        node.style.zIndex = String(fcs === i ? 30 : Math.round(near * 10));
+      });
+
+      // skill names of the focused group, placed next to their points
+      const fg = focusRef.current;
+      pts.forEach((p, i) => {
+        const node = skillLabelRefs.current[i];
+        if (!node) return;
+        if (fg < 0 || p.cat !== fg || t < 1) {
+          node.style.opacity = "0";
+          return;
+        }
+        v.copy(p.pos).applyMatrix4(world.matrixWorld).project(camera);
+        node.style.transform = `translate(${(v.x * 0.5 + 0.5) * rect.width + 9}px, ${(-v.y * 0.5 + 0.5) * rect.height}px) translate(0, -50%)`;
+        node.style.opacity = "1";
       });
 
       renderer.render(scene, camera);
@@ -338,6 +393,7 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
     };
     // with reduced motion we still need to redraw on interaction
     const kick = () => loop();
+    kickRef.current = kick;
     window.addEventListener("pointermove", kick);
     wrap.addEventListener("keydown", kick);
     loop();
@@ -368,15 +424,16 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
 
   const total = categories.reduce((n, c) => n + c.skills.length, 0);
   const short = (n: string) => (n.length > 24 ? n.replace(/ & .*/, "") : n);
+  const flat = categories.flatMap((c, ci) => c.skills.map((sk) => ({ cat: ci, name: sk.name, id: `${c.id}-${sk.id}` })));
 
   return (
-    <figure className="relative">
+    <figure className="relative overflow-hidden rounded-2xl border border-line bg-surface/50 p-3 backdrop-blur-sm sm:p-4">
       <div
         ref={wrapRef}
         tabIndex={0}
         role="img"
         aria-label={`3-D map of ${total} skills in ${categories.length} groups. Use the arrow keys to rotate.`}
-        className="relative h-[340px] w-full cursor-grab touch-pan-y select-none overflow-hidden rounded-2xl sm:h-[420px] lg:h-[520px]"
+        className="relative h-[340px] w-full cursor-grab touch-pan-y select-none overflow-hidden rounded-xl sm:h-[400px] lg:h-[460px]"
       >
         {categories.map((c, i) => (
           <span
@@ -384,9 +441,22 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
             ref={(n) => {
               labelRefs.current[i] = n;
             }}
-            className={`pointer-events-none absolute left-0 top-0 whitespace-nowrap rounded-md px-1.5 py-0.5 text-xs font-medium opacity-0 transition-colors ${activeCat === i ? "bg-surface text-text shadow-[var(--shadow)]" : "text-muted"}`}
+            className={`pointer-events-none absolute left-0 top-0 flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold opacity-0 shadow-[var(--shadow)] backdrop-blur ${focus === i ? "border-transparent text-white" : "border-line bg-surface/90 text-text"}`}
+            style={focus === i ? { background: groupColor(i) } : undefined}
           >
+            <i className="size-2 rounded-full" style={{ background: groupColor(i) }} />
             {short(c.name)}
+          </span>
+        ))}
+        {flat.map((f, i) => (
+          <span
+            key={f.id}
+            ref={(n) => {
+              skillLabelRefs.current[i] = n;
+            }}
+            className="pointer-events-none absolute left-0 top-0 whitespace-nowrap rounded-md bg-surface/90 px-1.5 py-0.5 text-[11px] font-medium text-text opacity-0 shadow-[var(--shadow)] transition-opacity duration-200"
+          >
+            {f.name}
           </span>
         ))}
         {hover && (
@@ -399,8 +469,33 @@ export default function SkillGalaxy({ categories }: { categories: SkillCategory[
           </div>
         )}
       </div>
-      <figcaption className="mt-3 text-sm text-faint">
-        {total} skills from this portfolio, clustered by area. Drag to orbit, point at one to read it.
+
+      <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Skill groups">
+        {categories.map((c, i) => {
+          const on = focus === i;
+          return (
+            <li key={c.id}>
+              <button
+                type="button"
+                aria-pressed={pinned === i}
+                onMouseEnter={() => setChipHover(i)}
+                onMouseLeave={() => setChipHover(null)}
+                onFocus={() => setChipHover(i)}
+                onBlur={() => setChipHover(null)}
+                onClick={() => setPinned(pinned === i ? null : i)}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${on ? "border-transparent text-white" : "border-line bg-surface/70 text-muted hover:text-text"}`}
+                style={on ? { background: groupColor(i) } : undefined}
+              >
+                <i className="size-2 rounded-full" style={{ background: on ? "#fff" : groupColor(i) }} />
+                {short(c.name)}
+                <span className={on ? "text-white/80" : "text-faint"}>{c.skills.length}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <figcaption className="mt-2 text-xs text-faint">
+        {total} skills in {categories.length} groups. Drag to rotate. Hover or click a group to see its skills.
       </figcaption>
       <ul className="sr-only">
         {categories.map((c) => (
