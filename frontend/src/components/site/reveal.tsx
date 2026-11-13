@@ -15,7 +15,7 @@ export function Reveal({ children, className, delay = 0 }: { children: React.Rea
   return (
     <div className={className} style={{ perspective: 1400 }}>
       <motion.div
-        initial={{ opacity: 0, y: 48, rotateX: 10, scale: 0.985 }}
+        initial={{ opacity: 0, y: 70, rotateX: 18, scale: 0.96 }}
         whileInView={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
         viewport={{ once: true, margin: "0px 0px -12% 0px" }}
         transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}

@@ -74,21 +74,23 @@ export function Skills({ categories }: { categories: SkillCategory[] }) {
   if (!categories.length) return null;
   return (
     <Section id="skills" title={t("sec.skills")} lede={t("sec.skills.lede")}>
-      <div className="divide-y divide-line border-y border-line">
+      <div className="grid gap-5 sm:grid-cols-2" style={{ perspective: 1400 }}>
         {categories.map((c) => (
-          <div key={c.id} className="grid gap-4 py-6 sm:grid-cols-[14rem_1fr] sm:gap-8">
-            <h3 className="flex items-start gap-2.5 font-sans text-[15px] font-semibold tracking-normal">
-              <CategoryIcon name={c.icon} className="mt-0.5 size-[18px] shrink-0 text-accent" />
-              {c.name}
-            </h3>
-            <ul className="flex flex-wrap gap-2" aria-label={`${c.name} skills`}>
-              {c.skills.map((s) => (
-                <li key={s.id} className="chip">
-                  {s.name}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <Tilt key={c.id} className="rounded-2xl" max={12}>
+            <div className="h-full rounded-2xl border border-line bg-surface p-6">
+              <h3 className="flex items-start gap-2.5 font-sans text-[15px] font-semibold tracking-normal">
+                <CategoryIcon name={c.icon} className="mt-0.5 size-[18px] shrink-0 text-accent" />
+                {c.name}
+              </h3>
+              <ul className="mt-4 flex flex-wrap gap-2" aria-label={`${c.name} skills`}>
+                {c.skills.map((s) => (
+                  <li key={s.id} className="chip [transform:translateZ(24px)] shadow-[0_8px_16px_-8px_rgba(0,0,0,0.5)]">
+                    {s.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Tilt>
         ))}
       </div>
     </Section>

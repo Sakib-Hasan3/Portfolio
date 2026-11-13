@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
  * Gives a card physical depth: it tilts toward the pointer and a soft light
  * follows the cursor. Mouse/pen only — touch and reduced-motion get a flat card.
  */
-export function Tilt({ children, className, max = 6 }: { children: React.ReactNode; className?: string; max?: number }) {
+export function Tilt({ children, className, max = 10 }: { children: React.ReactNode; className?: string; max?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const frame = useRef(0);
 

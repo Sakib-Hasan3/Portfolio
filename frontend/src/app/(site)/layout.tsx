@@ -1,6 +1,8 @@
 import Script from "next/script";
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
-import { CursorGlow, ScrollProgress } from "@/components/site/site-effects";
+import { CursorGlow, MagneticCursor, ScrollProgress } from "@/components/site/site-effects";
+import { Intro } from "@/components/site/intro";
+import { ScrollSceneLoader } from "@/components/site/scroll-scene-loader";
 import { SiteFooter } from "@/components/site/footer";
 import { SiteHeader, type NavItem } from "@/components/site/header";
 import { getPortfolioSafe } from "@/lib/api/server";
@@ -25,7 +27,10 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   const s = data?.settings;
   return (
     <>
+      <Intro name={name} />
       <CursorGlow />
+      <MagneticCursor />
+      <ScrollSceneLoader />
       <ScrollProgress />
       <SiteHeader name={name} nav={nav} resumeUrl={data?.resume?.file_url} />
       <main id="main">{children}</main>

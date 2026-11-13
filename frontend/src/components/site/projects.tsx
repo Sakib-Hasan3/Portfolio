@@ -8,6 +8,7 @@ import { Photo } from "./photo";
 import { cn } from "@/lib/utils";
 import { GitHubIcon } from "./icons";
 import { Tilt } from "./tilt";
+import { ProjectCarousel } from "./project-carousel";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -144,6 +145,7 @@ export function FeaturedProjects({
   const list = featured.length ? featured : projects.slice(0, 4);
   const [lead, ...rest] = list;
   if (!lead) return null;
+  if (list.length >= 3) return <ProjectCarousel projects={list} onSelect={onSelect} />;
   return (
     <div className="space-y-6">
       <ProjectCard project={lead} size="lg" onSelect={onSelect} index={0} />

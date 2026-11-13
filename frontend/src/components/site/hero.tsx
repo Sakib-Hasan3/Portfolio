@@ -60,7 +60,7 @@ export function Hero({ data }: { data: Portfolio }) {
             </div>
           </motion.div>
 
-          <motion.h1 {...fadeUp(0.1)} id="hero-title" className="mt-8 text-[clamp(2.75rem,7vw,5rem)] font-semibold leading-[0.98] tracking-[-0.035em]">
+          <motion.h1 {...fadeUp(0.1)} id="hero-title" className="grad-text mt-8 text-[clamp(2.75rem,7vw,5rem)] font-semibold leading-[0.98] tracking-[-0.035em]">
             {p.full_name}
           </motion.h1>
           <motion.p {...fadeUp(0.2)} className="mt-5 font-display text-xl text-text md:text-2xl">
