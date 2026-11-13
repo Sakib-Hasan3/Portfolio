@@ -82,7 +82,7 @@ export function Hero({ data }: { data: Portfolio }) {
                 <FileDown className="size-4" aria-hidden /> {t("hero.cv")}
               </a>
             ) : null}
-            <Link href="/#book" className="btn btn-ghost">
+            <Link href="/book" className="btn btn-ghost">
               <CalendarCheck className="size-4" aria-hidden /> Book a meeting
             </Link>
             <Link href="/#contact" className="btn btn-quiet">

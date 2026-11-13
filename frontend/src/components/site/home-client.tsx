@@ -7,7 +7,6 @@ import type { Portfolio, Project, Publication } from "@/lib/types";
 import { useT } from "@/components/i18n-provider";
 import { isVisible } from "@/lib/utils";
 import { ContactSection } from "./contact";
-import { BookMeeting } from "./booking";
 import { ProjectDrawer, ResearchDrawer } from "./detail-drawer";
 import { FeaturedProjects } from "./projects";
 import { PublicationList } from "./research";
@@ -72,7 +71,6 @@ export function HomeClient({ data }: { data: Portfolio }) {
       {isVisible(vis, "achievements") && <Achievements items={data.achievements} />}
       {isVisible(vis, "testimonials") && <Testimonials items={data.testimonials ?? []} />}
       {isVisible(vis, "notes") && <NotesPreview notes={data.notes ?? []} />}
-      {isVisible(vis, "contact") && <BookMeeting name={profile.full_name} enabled={data.settings?.contact_form_enabled ?? true} />}
       {isVisible(vis, "contact") && (
         <ContactSection profile={profile} links={data.social_links} enabled={data.settings?.contact_form_enabled ?? true} />
       )}

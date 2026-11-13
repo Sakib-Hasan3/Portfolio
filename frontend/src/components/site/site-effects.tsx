@@ -34,8 +34,8 @@ export function CursorGlow() {
     };
     const start = { x: window.innerWidth * 0.7, y: window.innerHeight * 0.25 };
     setHue(hueAt(start.x / window.innerWidth, start.y / window.innerHeight));
-    place(a, start.x, start.y, 640);
-    place(b, start.x, start.y, 1100);
+    place(a, start.x, start.y, 200);
+    place(b, start.x, start.y, 360);
     if (reduce || !fine) return;
 
     const target = { ...start };
@@ -47,8 +47,8 @@ export function CursorGlow() {
       p1.y += (target.y - p1.y) * 0.14;
       p2.x += (target.x - p2.x) * 0.045;
       p2.y += (target.y - p2.y) * 0.045;
-      place(a, p1.x, p1.y, 640);
-      place(b, p2.x, p2.y, 1100);
+      place(a, p1.x, p1.y, 200);
+      place(b, p2.x, p2.y, 360);
       raf = Math.abs(target.x - p2.x) + Math.abs(target.y - p2.y) > 0.6 ? requestAnimationFrame(tick) : 0;
     };
     const onMove = (e: PointerEvent) => {

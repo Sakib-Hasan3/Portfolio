@@ -20,13 +20,15 @@ export function PublicationList({
   author?: string;
   onSelect?: (p: Publication) => void;
 }) {
-  const years = useMemo(() => [...new Set(items.map((p) => p.year))].sort((a, b) => b - a), [items]);
+  const years = useMemo(() => [...new Set(items.map((p) => p.year))].sort((a, b) => a - b), [items]);
   const types = useMemo(() => [...new Set(items.map((p) => p.publication_type))], [items]);
   const [year, setYear] = useState<number | null>(null);
   const [type, setType] = useState<string | null>(null);
   const [copied, setCopied] = useState<number | null>(null);
 
-  const shown = items.filter((p) => (year ? p.year === year : true) && (type ? p.publication_type === type : true));
+  // oldest first: earlier papers come first, newer ones after (stable: same-year papers keep the admin order)
+  const ordered = useMemo(() => [...items].sort((a, b) => a.year - b.year), [items]);
+  const shown = ordered.filter((p) => (year ? p.year === year : true) && (type ? p.publication_type === type : true));
   const showFilters = years.length > 1 || types.length > 1;
 
   return (

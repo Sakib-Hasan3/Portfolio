@@ -25,3 +25,7 @@ uploads/
 .DS_Store
 .vscode/
 .idea/
+
+# Render environment files (contain secrets)
+render-env/
+.env.render*
