@@ -3,17 +3,11 @@
 import Link from "next/link";
 import { CalendarCheck, FileDown, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
 import type { Portfolio } from "@/lib/types";
 import { HeroVisual } from "./hero-visual";
 import { SocialIcon } from "./icons";
 import { useT } from "@/components/i18n-provider";
-import { useEffect, useState } from "react";
-import { useIdleReady } from "@/lib/use-idle";
-import { hasWebGL } from "@/lib/webgl";
 import { Photo } from "./photo";
-
-const HeroScene = dynamic(() => import("./hero-scene"), { ssr: false, loading: () => null });
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -25,15 +19,11 @@ const fadeUp = (delay = 0) => ({
 
 export function Hero({ data }: { data: Portfolio }) {
   const t = useT();
-  const ready = useIdleReady();
-  const [gl, setGl] = useState(false);
-  useEffect(() => setGl(hasWebGL()), []);
   const p = data.profile!;
   const heroLinks = data.social_links.filter((l) => l.show_in_hero);
 
   return (
     <section className="relative container-x pb-16 pt-10 md:pb-24 md:pt-16 overflow-hidden" aria-labelledby="hero-title">
-      {ready && gl && <HeroScene />}
       <div className="grid items-center gap-12 lg:grid-cols-12">
         <div className="relative z-10 lg:col-span-7">
           <motion.div {...fadeUp(0)} className="flex items-center gap-4">
