@@ -35,3 +35,20 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
+
+  # The website (Next.js). Hosted on Render too, so one dashboard runs everything and nothing depends on Vercel.
+  - type: web
+    name: portfolio-web
+    runtime: docker
+    plan: free
+    rootDir: frontend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /robots.txt
+    autoDeploy: true
+    envVars:
+      - key: API_INTERNAL_URL     # URL of the portfolio-api service, e.g. https://portfolio-api.onrender.com
+        sync: false
+      - key: REVALIDATE_SECRET    # must equal REVALIDATE_SECRET on portfolio-api
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL # this site's own URL, e.g. https://portfolio-web.onrender.com
+        sync: false
