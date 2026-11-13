@@ -22,6 +22,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   if (data?.projects.length && isVisible(vis, "projects")) nav.push({ href: "/projects", label: t("nav.projects") });
   if (data?.notes?.length && isVisible(vis, "notes")) nav.push({ href: "/notes", label: t("nav.notes") });
   if (data?.experience.length && isVisible(vis, "experience")) nav.push({ href: "/#experience", label: t("nav.experience") });
+  if (isVisible(vis, "contact")) nav.push({ href: "/#book", label: "Book a call" });
   if (isVisible(vis, "contact")) nav.push({ href: "/#contact", label: t("nav.contact") });
 
   const s = data?.settings;

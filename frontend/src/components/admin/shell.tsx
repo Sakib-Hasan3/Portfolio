@@ -38,7 +38,7 @@ const NAV: { group: string; items: { href: string; label: string; icon: React.Co
       { href: "/admin/education", label: "Education", icon: GraduationCap },
       { href: "/admin/achievements", label: "Achievements", icon: Trophy },
       { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquareQuote },
-      { href: "/admin/notes", label: "Notes", icon: NotebookPen },
+      { href: "/admin/notes", label: "Blog", icon: NotebookPen },
     ],
   },
   {

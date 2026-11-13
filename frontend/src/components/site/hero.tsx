@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FileDown, MapPin } from "lucide-react";
+import { CalendarCheck, FileDown, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import type { Portfolio } from "@/lib/types";
@@ -82,6 +82,9 @@ export function Hero({ data }: { data: Portfolio }) {
                 <FileDown className="size-4" aria-hidden /> {t("hero.cv")}
               </a>
             ) : null}
+            <Link href="/#book" className="btn btn-ghost">
+              <CalendarCheck className="size-4" aria-hidden /> Book a meeting
+            </Link>
             <Link href="/#contact" className="btn btn-quiet">
               {t("hero.contact")}
             </Link>
@@ -112,6 +115,19 @@ export function Hero({ data }: { data: Portfolio }) {
           </motion.div>
         )}
       </div>
+      <motion.dl {...fadeUp(0.55)} className="stat-strip relative z-10 mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line md:grid-cols-4">
+        {[
+          [data.projects.length, "Projects built"],
+          [data.publications.length, "Publications"],
+          [data.skills.reduce((n, c) => n + c.skills.length, 0), "Skills & tools"],
+          [data.experience.length + data.education.length, "Roles & degrees"],
+        ].map(([n, l]) => (
+          <div key={String(l)} className="bg-surface/60 px-5 py-4 backdrop-blur">
+            <dt className="order-2 text-xs uppercase tracking-wider text-faint">{l}</dt>
+            <dd className="font-display text-3xl font-semibold text-text">{n}<span className="text-accent">+</span></dd>
+          </div>
+        ))}
+      </motion.dl>
     </section>
   );
 }

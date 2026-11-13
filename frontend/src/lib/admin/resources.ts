@@ -308,13 +308,13 @@ export const RESOURCES: Record<string, ResourceDef> = {
 
   notes: {
     name: "notes",
-    label: "Note",
-    plural: "Notes",
-    description: "Technical write-ups shown under /notes. Write in Markdown or upload a .md file.",
+    label: "Blog post",
+    plural: "Blog",
+    description: "Blog posts shown under /notes. Write in Markdown (headings, code, images, lists) or upload a .md file. Use Publish to make a post live.",
     titleKey: "title",
     subtitleKey: "summary",
     publishable: true,
-    searchPlaceholder: "Search notes",
+    searchPlaceholder: "Search blog posts",
     columns: [
       { key: "title", label: "Title" },
       { key: "tags", label: "Tags", kind: "list" },

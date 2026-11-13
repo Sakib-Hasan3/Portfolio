@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 export async function generateMetadata(): Promise<Metadata> {
   const data = await getPortfolioSafe();
   const name = data?.profile?.full_name ?? "Portfolio";
-  return baseMetadata(data, { title: `Notes — ${name}`, description: `Technical write-ups by ${name}: machine learning, LLM systems and full-stack engineering.`, path: "/notes" });
+  return baseMetadata(data, { title: `Blog — ${name}`, description: `Articles by ${name}: machine learning, LLM systems and full-stack engineering.`, path: "/notes" });
 }
 
 export default async function NotesPage({ searchParams }: { searchParams: Promise<{ tag?: string }> }) {

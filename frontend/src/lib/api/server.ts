@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import type { Note, NoteCard, Portfolio, Project, Publication } from "@/lib/types";
+import { SAMPLE_CARDS, SAMPLE_POSTS } from "@/lib/sample-posts";
 
 /** Base URL the Next.js server uses to reach FastAPI (internal network address in Docker). */
 export const API_INTERNAL_URL = (process.env.API_INTERNAL_URL || "http://localhost:8000").replace(/\/$/, "");
@@ -45,12 +46,12 @@ export const getPublications = unstable_cache(() => getJSON<Publication[]>("/pub
   revalidate: FALLBACK_REVALIDATE,
 });
 
-export const getNotes = unstable_cache(() => getJSON<NoteCard[]>("/public/notes"), ["notes"], {
+const getNotesReal = unstable_cache(() => getJSON<NoteCard[]>("/public/notes"), ["notes"], {
   tags: ["portfolio", "notes"],
   revalidate: FALLBACK_REVALIDATE,
 });
 
-export const getNote = (slug: string) =>
+const getNoteReal = (slug: string) =>
   unstable_cache(() => getJSON<Note>(`/public/notes/${encodeURIComponent(slug)}`), ["note", slug], {
     tags: ["portfolio", "notes"],
     revalidate: FALLBACK_REVALIDATE,
@@ -65,9 +66,26 @@ export const getSitemapData = unstable_cache(
   { tags: ["portfolio", "projects", "publications"], revalidate: FALLBACK_REVALIDATE },
 );
 
+/** Real posts, or the built-in starter posts while none are published. */
+export async function getNotes(): Promise<NoteCard[]> {
+  const real = await getNotesReal();
+  return real.length ? real : SAMPLE_CARDS;
+}
+
+export async function getNote(slug: string): Promise<Note> {
+  try {
+    return await getNoteReal(slug);
+  } catch (e) {
+    const sample = SAMPLE_POSTS.find((p) => p.slug === slug);
+    if (e instanceof NotFoundError && sample && !(await getNotesReal().catch(() => [])).length) return sample;
+    throw e;
+  }
+}
+
 export async function getPortfolioSafe(): Promise<Portfolio | null> {
   try {
-    return await getPortfolio();
+    const data = await getPortfolio();
+    return data.notes?.length ? data : { ...data, notes: SAMPLE_CARDS };
   } catch (err) {
     console.error("[portfolio] failed to load content", err);
     return null;
