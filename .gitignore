@@ -29,3 +29,6 @@ uploads/
 # Render environment files (contain secrets)
 render-env/
 .env.render*
+
+# TypeScript build cache
+*.tsbuildinfo
