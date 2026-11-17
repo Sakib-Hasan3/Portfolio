@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { API_INTERNAL_URL } from "./server";
+import { fetchWithRetry } from "./retry";
 
 const FORWARD_REQUEST_HEADERS = ["accept", "content-type", "cookie", "x-csrf-token", "user-agent", "authorization"];
 const DROP_RESPONSE_HEADERS = new Set(["content-encoding", "content-length", "transfer-encoding", "connection", "set-cookie"]);
@@ -24,7 +25,7 @@ export async function proxy(req: NextRequest, upstreamPath: string): Promise<Res
   const hasBody = !["GET", "HEAD"].includes(req.method);
   let upstream: Response;
   try {
-    upstream = await fetch(target, {
+    upstream = await fetchWithRetry(target, {
       method: req.method,
       headers,
       body: hasBody ? await req.arrayBuffer() : undefined,

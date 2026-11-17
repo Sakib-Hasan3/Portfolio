@@ -2,6 +2,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import type { Note, NoteCard, Portfolio, Project, Publication } from "@/lib/types";
 import { SAMPLE_CARDS, SAMPLE_POSTS } from "@/lib/sample-posts";
+import { fetchWithRetry } from "./retry";
 
 /** Base URL the Next.js server uses to reach FastAPI (internal network address in Docker). */
 export const API_INTERNAL_URL = (process.env.API_INTERNAL_URL || "http://localhost:8000").replace(/\/$/, "");
@@ -10,7 +11,7 @@ const FALLBACK_REVALIDATE = Number(process.env.CONTENT_REVALIDATE_SECONDS || 360
 export class NotFoundError extends Error {}
 
 async function getJSON<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_INTERNAL_URL}/api/v1${path}`, {
+  const res = await fetchWithRetry(`${API_INTERNAL_URL}/api/v1${path}`, {
     headers: { accept: "application/json" },
     cache: "no-store", // caching is handled by unstable_cache below, keyed by tags
   });

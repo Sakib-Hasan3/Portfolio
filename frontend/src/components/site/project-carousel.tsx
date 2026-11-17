@@ -40,7 +40,7 @@ export function ProjectCarousel({ projects, onSelect }: { projects: Project[]; o
       }}
       className="select-none outline-none [touch-action:pan-y]"
     >
-      <div className="relative mx-auto h-[640px] sm:h-[600px]" style={{ perspective: 1600 }}>
+      <div className="relative mx-auto h-[640px] overflow-x-clip sm:h-[600px]" style={{ perspective: 1600 }}>
         {projects.map((p, i) => {
           const off = i - active;
           const abs = Math.abs(off);

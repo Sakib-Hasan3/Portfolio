@@ -88,6 +88,7 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  overflow-x: clip; /* safety net: nothing may widen the page on phones */
 }
 @media (prefers-reduced-motion: reduce) {
   html {
